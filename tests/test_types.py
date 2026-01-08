@@ -2,7 +2,6 @@
 Tests for fastlitellm.types module.
 """
 
-
 import pytest
 
 from fastlitellm.types import (
@@ -55,9 +54,7 @@ class TestToolCall:
     def test_create_tool_call(self):
         """Test basic ToolCall creation."""
         tc = ToolCall(
-            id="call_123",
-            type="function",
-            function=FunctionCall(name="test", arguments="{}")
+            id="call_123", type="function", function=FunctionCall(name="test", arguments="{}")
         )
         assert tc.id == "call_123"
         assert tc.type == "function"
@@ -65,10 +62,7 @@ class TestToolCall:
 
     def test_model_dump(self):
         """Test model_dump serialization."""
-        tc = ToolCall(
-            id="call_123",
-            function=FunctionCall(name="test", arguments='{"x": 1}')
-        )
+        tc = ToolCall(id="call_123", function=FunctionCall(name="test", arguments='{"x": 1}'))
         dumped = tc.model_dump()
         assert dumped["id"] == "call_123"
         assert dumped["type"] == "function"
@@ -128,11 +122,7 @@ class TestUsage:
         """Test model_dump serialization."""
         usage = Usage(prompt_tokens=10, completion_tokens=20, total_tokens=30)
         dumped = usage.model_dump()
-        assert dumped == {
-            "prompt_tokens": 10,
-            "completion_tokens": 20,
-            "total_tokens": 30
-        }
+        assert dumped == {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
 
 
 class TestChoice:
@@ -165,12 +155,7 @@ class TestModelResponse:
         choice = Choice(index=0, message=msg, finish_reason="stop")
         usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
 
-        response = ModelResponse(
-            id="resp-123",
-            model="gpt-4o-mini",
-            choices=[choice],
-            usage=usage
-        )
+        response = ModelResponse(id="resp-123", model="gpt-4o-mini", choices=[choice], usage=usage)
 
         assert response.id == "resp-123"
         assert response.model == "gpt-4o-mini"
@@ -181,11 +166,7 @@ class TestModelResponse:
     def test_model_extra_contains_usage(self):
         """Test that model_extra is populated with usage."""
         usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
-        response = ModelResponse(
-            id="resp-123",
-            choices=[],
-            usage=usage
-        )
+        response = ModelResponse(id="resp-123", choices=[], usage=usage)
         assert "usage" in response.model_extra
         assert response.model_extra["usage"]["total_tokens"] == 15
 
@@ -193,11 +174,7 @@ class TestModelResponse:
         """Test model_dump serialization."""
         msg = Message(role="assistant", content="Hi")
         choice = Choice(index=0, message=msg, finish_reason="stop")
-        response = ModelResponse(
-            id="resp-123",
-            model="gpt-4o-mini",
-            choices=[choice]
-        )
+        response = ModelResponse(id="resp-123", model="gpt-4o-mini", choices=[choice])
         dumped = response.model_dump()
         assert dumped["id"] == "resp-123"
         assert dumped["model"] == "gpt-4o-mini"
@@ -219,12 +196,7 @@ class TestStreamChunk:
     def test_chunk_with_usage(self):
         """Test chunk with usage (include_usage=True)."""
         usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
-        chunk = StreamChunk(
-            id="chunk-1",
-            model="gpt-4o-mini",
-            choices=[],
-            usage=usage
-        )
+        chunk = StreamChunk(id="chunk-1", model="gpt-4o-mini", choices=[], usage=usage)
         assert chunk.usage is not None
         assert chunk.usage.total_tokens == 15
 
@@ -242,14 +214,10 @@ class TestEmbedding:
         """Test EmbeddingResponse creation."""
         data = [
             EmbeddingData(index=0, embedding=[0.1, 0.2]),
-            EmbeddingData(index=1, embedding=[0.3, 0.4])
+            EmbeddingData(index=1, embedding=[0.3, 0.4]),
         ]
         usage = EmbeddingUsage(prompt_tokens=10, total_tokens=10)
-        response = EmbeddingResponse(
-            model="text-embedding-3-small",
-            data=data,
-            usage=usage
-        )
+        response = EmbeddingResponse(model="text-embedding-3-small", data=data, usage=usage)
         assert response.model == "text-embedding-3-small"
         assert len(response.data) == 2
         assert response.usage.prompt_tokens == 10

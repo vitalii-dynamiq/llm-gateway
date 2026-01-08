@@ -206,9 +206,7 @@ def requires_env(*env_vars: str):
     def decorator(func):
         missing = [v for v in env_vars if not os.environ.get(v)]
         if missing:
-            return pytest.mark.skip(
-                reason=f"Missing required env vars: {', '.join(missing)}"
-            )(func)
+            return pytest.mark.skip(reason=f"Missing required env vars: {', '.join(missing)}")(func)
         return func
 
     return decorator
@@ -252,8 +250,7 @@ def redact_secrets(data: dict[str, Any]) -> dict[str, Any]:
             return {k: redact_value(k, v) for k, v in value.items()}
         if isinstance(value, list):
             return [
-                redact_value(str(i), v) if isinstance(v, dict) else v
-                for i, v in enumerate(value)
+                redact_value(str(i), v) if isinstance(v, dict) else v for i, v in enumerate(value)
             ]
         return value
 
@@ -276,9 +273,7 @@ SYSTEM_MESSAGES = [
     {"role": "user", "content": "What is 2+2?"},
 ]
 
-TOOL_MESSAGES = [
-    {"role": "user", "content": "What's the weather in San Francisco?"}
-]
+TOOL_MESSAGES = [{"role": "user", "content": "What's the weather in San Francisco?"}]
 
 WEATHER_TOOL = {
     "type": "function",

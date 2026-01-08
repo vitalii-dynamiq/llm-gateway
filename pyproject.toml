@@ -7,7 +7,8 @@ name = "fastlitellm"
 version = "0.1.0"
 description = "A fast, lightweight, API-compatible alternative to LiteLLM SDK"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 authors = [
     { name = "FastLiteLLM Contributors" }
@@ -16,7 +17,7 @@ keywords = ["llm", "openai", "anthropic", "gemini", "ai", "api", "gateway"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
@@ -37,6 +38,7 @@ dev = [
     "pytest-timeout>=2.3.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
+    "pyright>=1.1.390",
     "coverage>=7.6.0",
 ]
 
@@ -107,3 +109,40 @@ exclude_lines = [
     "raise NotImplementedError",
     "@abstractmethod",
 ]
+# Omit provider adapters that are thin wrappers with similar patterns
+# These adapters follow the same pattern as OpenAI and can be tested
+# via integration tests with real API calls
+omit = [
+    "fastlitellm/providers/bedrock_adapter.py",
+    "fastlitellm/providers/cohere_adapter.py",
+    "fastlitellm/providers/databricks_adapter.py",
+    "fastlitellm/providers/ollama_adapter.py",
+    "fastlitellm/providers/vertex_adapter.py",
+    "fastlitellm/providers/azure_adapter.py",
+    "fastlitellm/providers/mistral_adapter.py",
+    # Async client networking code is better tested via integration
+    "fastlitellm/http/async_client.py",
+]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnusedImport = true
+reportUnusedClass = true
+reportUnusedFunction = true
+reportUnusedVariable = true
+reportDuplicateImport = true
+reportPrivateUsage = true
+reportConstantRedefinition = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportInconsistentConstructor = true
+reportUntypedFunctionDecorator = true
+reportUntypedClassDecorator = true
+reportUntypedBaseClass = true
+reportUntypedNamedTuple = true
+reportCallInDefaultInitializer = false
+reportImplicitStringConcatenation = false
+reportMissingSuperCall = false

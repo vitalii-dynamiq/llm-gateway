@@ -104,8 +104,8 @@ class BedrockAdapter(BaseAdapter):
         host = parsed.hostname or ""
         path = parsed.path or "/"
 
-        # Current time
-        now = datetime.datetime.utcnow()
+        # Current time (timezone-aware UTC)
+        now = datetime.datetime.now(datetime.UTC)
         amz_date = now.strftime("%Y%m%dT%H%M%SZ")
         date_stamp = now.strftime("%Y%m%d")
 
@@ -263,10 +263,10 @@ class BedrockAdapter(BaseAdapter):
 
         # Handle tools
         if kwargs.get("tools"):
-            tools = []
+            tools: list[dict[str, Any]] = []
             for tool in kwargs["tools"]:
                 if tool.get("type") == "function":
-                    func = tool.get("function", {})
+                    func: dict[str, Any] = tool.get("function", {})
                     tools.append(
                         {
                             "name": func.get("name", ""),

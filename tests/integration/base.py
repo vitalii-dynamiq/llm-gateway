@@ -133,11 +133,7 @@ class IntegrationTestBase:
 
         for chunk in response:
             chunks.append(chunk)
-            if (
-                chunk.choices
-                and chunk.choices[0].delta
-                and chunk.choices[0].delta.content
-            ):
+            if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
                 content_parts.append(chunk.choices[0].delta.content)
 
         assert len(chunks) > 0, "Expected at least one chunk"
@@ -203,9 +199,7 @@ class IntegrationTestBase:
         response = self.retry_on_rate_limit(
             completion,
             model=f"{self.PROVIDER}/{self.PRIMARY_MODEL}",
-            messages=[
-                {"role": "user", "content": "What's the weather in Paris?"}
-            ],
+            messages=[{"role": "user", "content": "What's the weather in Paris?"}],
             tools=tools,
             tool_choice="auto",
             max_tokens=100,
@@ -216,8 +210,7 @@ class IntegrationTestBase:
         choice = response.choices[0]
         # Check if tool calls present or regular content
         has_tool_calls = (
-            choice.message.tool_calls is not None
-            and len(choice.message.tool_calls) > 0
+            choice.message.tool_calls is not None and len(choice.message.tool_calls) > 0
         )
         has_content = choice.message.content is not None
 
@@ -248,7 +241,7 @@ class IntegrationTestBase:
             messages=[
                 {
                     "role": "user",
-                    "content": "Return a JSON object with fields 'name' (string) and 'age' (number). Example: {\"name\": \"Alice\", \"age\": 30}",
+                    "content": 'Return a JSON object with fields \'name\' (string) and \'age\' (number). Example: {"name": "Alice", "age": 30}',
                 }
             ],
             response_format={"type": "json_object"},

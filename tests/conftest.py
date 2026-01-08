@@ -11,6 +11,7 @@ import pytest
 # OpenAI Response Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def openai_completion_response() -> dict[str, Any]:
     """Standard OpenAI chat completion response."""
@@ -22,19 +23,12 @@ def openai_completion_response() -> dict[str, Any]:
         "choices": [
             {
                 "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": "Hello! How can I help you today?"
-                },
-                "finish_reason": "stop"
+                "message": {"role": "assistant", "content": "Hello! How can I help you today?"},
+                "finish_reason": "stop",
             }
         ],
-        "usage": {
-            "prompt_tokens": 9,
-            "completion_tokens": 12,
-            "total_tokens": 21
-        },
-        "system_fingerprint": "fp_123abc"
+        "usage": {"prompt_tokens": 9, "completion_tokens": 12, "total_tokens": 21},
+        "system_fingerprint": "fp_123abc",
     }
 
 
@@ -58,19 +52,15 @@ def openai_tool_call_response() -> dict[str, Any]:
                             "type": "function",
                             "function": {
                                 "name": "get_weather",
-                                "arguments": '{"location": "San Francisco", "unit": "celsius"}'
-                            }
+                                "arguments": '{"location": "San Francisco", "unit": "celsius"}',
+                            },
                         }
-                    ]
+                    ],
                 },
-                "finish_reason": "tool_calls"
+                "finish_reason": "tool_calls",
             }
         ],
-        "usage": {
-            "prompt_tokens": 50,
-            "completion_tokens": 30,
-            "total_tokens": 80
-        }
+        "usage": {"prompt_tokens": 50, "completion_tokens": 30, "total_tokens": 80},
     }
 
 
@@ -82,7 +72,7 @@ def openai_stream_chunks() -> list[str]:
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}\n\n',
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
-        'data: [DONE]\n\n',
+        "data: [DONE]\n\n",
     ]
 
 
@@ -93,7 +83,7 @@ def openai_stream_with_usage() -> list[str]:
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}\n\n',
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":"Hi"},"finish_reason":null}]}\n\n',
         'data: {"id":"chatcmpl-789","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}}\n\n',
-        'data: [DONE]\n\n',
+        "data: [DONE]\n\n",
     ]
 
 
@@ -106,25 +96,23 @@ def openai_embedding_response() -> dict[str, Any]:
             {
                 "object": "embedding",
                 "index": 0,
-                "embedding": [0.0023064255, -0.009327292, 0.015797347]
+                "embedding": [0.0023064255, -0.009327292, 0.015797347],
             },
             {
                 "object": "embedding",
                 "index": 1,
-                "embedding": [0.0012345678, -0.007654321, 0.012345678]
-            }
+                "embedding": [0.0012345678, -0.007654321, 0.012345678],
+            },
         ],
         "model": "text-embedding-3-small",
-        "usage": {
-            "prompt_tokens": 8,
-            "total_tokens": 8
-        }
+        "usage": {"prompt_tokens": 8, "total_tokens": 8},
     }
 
 
 # =============================================================================
 # Anthropic Response Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def anthropic_completion_response() -> dict[str, Any]:
@@ -133,18 +121,10 @@ def anthropic_completion_response() -> dict[str, Any]:
         "id": "msg_123",
         "type": "message",
         "role": "assistant",
-        "content": [
-            {
-                "type": "text",
-                "text": "Hello! How can I assist you today?"
-            }
-        ],
+        "content": [{"type": "text", "text": "Hello! How can I assist you today?"}],
         "model": "claude-3-5-sonnet-20241022",
         "stop_reason": "end_turn",
-        "usage": {
-            "input_tokens": 10,
-            "output_tokens": 15
-        }
+        "usage": {"input_tokens": 10, "output_tokens": 15},
     }
 
 
@@ -156,26 +136,17 @@ def anthropic_tool_call_response() -> dict[str, Any]:
         "type": "message",
         "role": "assistant",
         "content": [
-            {
-                "type": "text",
-                "text": "I'll check the weather for you."
-            },
+            {"type": "text", "text": "I'll check the weather for you."},
             {
                 "type": "tool_use",
                 "id": "toolu_123",
                 "name": "get_weather",
-                "input": {
-                    "location": "San Francisco",
-                    "unit": "celsius"
-                }
-            }
+                "input": {"location": "San Francisco", "unit": "celsius"},
+            },
         ],
         "model": "claude-3-5-sonnet-20241022",
         "stop_reason": "tool_use",
-        "usage": {
-            "input_tokens": 50,
-            "output_tokens": 40
-        }
+        "usage": {"input_tokens": 50, "output_tokens": 40},
     }
 
 
@@ -197,33 +168,26 @@ def anthropic_stream_events() -> list[str]:
 # Gemini Response Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def gemini_completion_response() -> dict[str, Any]:
     """Gemini generateContent response."""
     return {
         "candidates": [
             {
-                "content": {
-                    "parts": [
-                        {"text": "Hello! How can I help you?"}
-                    ],
-                    "role": "model"
-                },
+                "content": {"parts": [{"text": "Hello! How can I help you?"}], "role": "model"},
                 "finishReason": "STOP",
-                "index": 0
+                "index": 0,
             }
         ],
-        "usageMetadata": {
-            "promptTokenCount": 8,
-            "candidatesTokenCount": 10,
-            "totalTokenCount": 18
-        }
+        "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 10, "totalTokenCount": 18},
     }
 
 
 # =============================================================================
 # Test Messages
 # =============================================================================
+
 
 @pytest.fixture
 def simple_messages() -> list[dict[str, Any]]:
@@ -236,7 +200,7 @@ def messages_with_system() -> list[dict[str, Any]]:
     """Messages with system prompt."""
     return [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello!"}
+        {"role": "user", "content": "Hello!"},
     ]
 
 
@@ -245,7 +209,7 @@ def messages_with_tools() -> list[dict[str, Any]]:
     """Messages for tool calling."""
     return [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "What's the weather in San Francisco?"}
+        {"role": "user", "content": "What's the weather in San Francisco?"},
     ]
 
 
@@ -263,16 +227,13 @@ def tool_definition() -> list[dict[str, Any]]:
                     "properties": {
                         "location": {
                             "type": "string",
-                            "description": "The city and state, e.g. San Francisco, CA"
+                            "description": "The city and state, e.g. San Francisco, CA",
                         },
-                        "unit": {
-                            "type": "string",
-                            "enum": ["celsius", "fahrenheit"]
-                        }
+                        "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
                     },
-                    "required": ["location"]
-                }
-            }
+                    "required": ["location"],
+                },
+            },
         }
     ]
 
@@ -280,6 +241,7 @@ def tool_definition() -> list[dict[str, Any]]:
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
 
 def response_to_bytes(response: dict[str, Any]) -> bytes:
     """Convert dict response to bytes."""

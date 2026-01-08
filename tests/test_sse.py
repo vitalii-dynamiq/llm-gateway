@@ -2,7 +2,6 @@
 Tests for fastlitellm.http.sse module.
 """
 
-
 from fastlitellm.http.sse import SSEEvent, SSEParser, parse_sse_stream
 
 
@@ -148,6 +147,7 @@ class TestParseSSEStream:
 
     def test_parse_stream(self):
         """Test parsing byte stream."""
+
         def stream():
             yield b"data: first\n\n"
             yield b"data: second\n\n"
@@ -159,6 +159,7 @@ class TestParseSSEStream:
 
     def test_parse_chunked_stream(self):
         """Test parsing chunked byte stream."""
+
         def stream():
             yield b"data: hel"
             yield b"lo\n\n"
@@ -172,10 +173,11 @@ class TestParseSSEStream:
 
     def test_parse_openai_style_stream(self):
         """Test parsing OpenAI-style SSE stream."""
+
         def stream():
             yield b'data: {"id":"1","choices":[{"delta":{"content":"Hello"}}]}\n\n'
             yield b'data: {"id":"1","choices":[{"delta":{"content":"!"}}]}\n\n'
-            yield b'data: [DONE]\n\n'
+            yield b"data: [DONE]\n\n"
 
         events = list(parse_sse_stream(stream()))
         assert len(events) == 3

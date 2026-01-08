@@ -216,7 +216,8 @@ class GeminiAdapter(BaseAdapter):
         if "max_tokens" in kwargs and kwargs["max_tokens"] is not None:
             generation_config["maxOutputTokens"] = kwargs["max_tokens"]
         if kwargs.get("stop"):
-            stops = kwargs["stop"] if isinstance(kwargs["stop"], list) else [kwargs["stop"]]
+            stop_val: str | list[str] = kwargs["stop"]
+            stops: list[str] = stop_val if isinstance(stop_val, list) else [stop_val]
             generation_config["stopSequences"] = stops
 
         # Handle response_format for JSON mode

@@ -91,15 +91,16 @@ class AnthropicAdapter(BaseAdapter):
         anthropic_messages: list[dict[str, Any]] = []
 
         for msg in messages:
-            role = msg.get("role", "")
-            content = msg.get("content", "")
+            role: str = msg.get("role", "")
+            content: str | list[dict[str, Any]] = msg.get("content", "")
 
             if role == "system":
                 # Anthropic takes system as a separate parameter
+                content_str = content if isinstance(content, str) else ""
                 if system_prompt:
-                    system_prompt += "\n\n" + content
+                    system_prompt += "\n\n" + content_str
                 else:
-                    system_prompt = content
+                    system_prompt = content_str
             elif role == "user":
                 # Handle potential multimodal content
                 if isinstance(content, list):
@@ -128,7 +129,7 @@ class AnthropicAdapter(BaseAdapter):
                     anthropic_messages.append({"role": "assistant", "content": content or ""})
             elif role == "tool":
                 # Tool result message
-                tool_result = {
+                tool_result: dict[str, Any] = {
                     "type": "tool_result",
                     "tool_use_id": msg.get("tool_call_id", ""),
                     "content": content,
@@ -136,7 +137,7 @@ class AnthropicAdapter(BaseAdapter):
                 # Anthropic requires tool results in a user message
                 if anthropic_messages and anthropic_messages[-1]["role"] == "user":
                     # Append to existing user message
-                    existing = anthropic_messages[-1]["content"]
+                    existing: str | list[dict[str, Any]] = anthropic_messages[-1]["content"]
                     if isinstance(existing, list):
                         existing.append(tool_result)
                     else:

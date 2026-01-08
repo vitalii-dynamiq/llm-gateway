@@ -566,7 +566,9 @@ def stream_chunk_builder(
     # Use specialized structure for better performance
     choice_roles: dict[int, str | None] = {}
     choice_content: dict[int, list[str]] = {}
-    choice_tool_calls: dict[int, dict[int, list[Any]]] = {}  # idx -> tc_idx -> [id, type, name_parts, arg_parts]
+    choice_tool_calls: dict[
+        int, dict[int, list[Any]]
+    ] = {}  # idx -> tc_idx -> [id, type, name_parts, arg_parts]
     choice_finish: dict[int, str | None] = {}
     choice_logprobs: dict[int, dict[str, Any] | None] = {}
 

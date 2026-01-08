@@ -100,9 +100,9 @@ class CohereAdapter(BaseAdapter):
 
                 # Handle tool calls
                 if msg.get("tool_calls"):
-                    tool_calls = []
+                    tool_calls: list[dict[str, Any]] = []
                     for tc in msg["tool_calls"]:
-                        func = tc.get("function", {})
+                        func: dict[str, Any] = tc.get("function", {})
                         tool_calls.append(
                             {
                                 "id": tc.get("id", ""),
@@ -179,7 +179,8 @@ class CohereAdapter(BaseAdapter):
         if "max_tokens" in kwargs and kwargs["max_tokens"] is not None:
             body["max_tokens"] = kwargs["max_tokens"]
         if kwargs.get("stop"):
-            stops = kwargs["stop"] if isinstance(kwargs["stop"], list) else [kwargs["stop"]]
+            stop_val: str | list[str] = kwargs["stop"]
+            stops: list[str] = stop_val if isinstance(stop_val, list) else [stop_val]
             body["stop_sequences"] = stops
         if "seed" in kwargs and kwargs["seed"] is not None:
             body["seed"] = kwargs["seed"]

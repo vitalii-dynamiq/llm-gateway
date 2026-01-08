@@ -196,34 +196,43 @@ class TestModelCapabilities:
 class TestCapabilitiesCoverage:
     """Tests for capabilities coverage of common models."""
 
-    @pytest.mark.parametrize("model", [
-        "gpt-4o",
-        "gpt-4o-mini",
-        "gpt-4-turbo",
-        "gpt-3.5-turbo",
-        "o1",
-        "o1-mini",
-    ])
+    @pytest.mark.parametrize(
+        "model",
+        [
+            "gpt-4o",
+            "gpt-4o-mini",
+            "gpt-4-turbo",
+            "gpt-3.5-turbo",
+            "o1",
+            "o1-mini",
+        ],
+    )
     def test_openai_models_have_capabilities(self, model):
         """Test OpenAI models have capabilities defined."""
         caps = get_model_capabilities(model)
         assert caps.max_tokens is not None
         assert caps.context_window is not None
 
-    @pytest.mark.parametrize("model", [
-        "claude-3-5-sonnet-20241022",
-        "claude-3-opus-20240229",
-        "claude-3-haiku-20240307",
-    ])
+    @pytest.mark.parametrize(
+        "model",
+        [
+            "claude-3-5-sonnet-20241022",
+            "claude-3-opus-20240229",
+            "claude-3-haiku-20240307",
+        ],
+    )
     def test_anthropic_models_have_capabilities(self, model):
         """Test Anthropic models have capabilities defined."""
         caps = get_model_capabilities(model)
         assert caps.max_tokens is not None
 
-    @pytest.mark.parametrize("model", [
-        "gemini-1.5-pro",
-        "gemini-1.5-flash",
-    ])
+    @pytest.mark.parametrize(
+        "model",
+        [
+            "gemini-1.5-pro",
+            "gemini-1.5-flash",
+        ],
+    )
     def test_gemini_models_have_capabilities(self, model):
         """Test Gemini models have capabilities defined."""
         caps = get_model_capabilities(model)

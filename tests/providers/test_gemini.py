@@ -46,11 +46,7 @@ class TestBuildRequest:
     def test_build_simple_request(self, adapter):
         """Test building a simple chat request."""
         messages = [{"role": "user", "content": "Hello"}]
-        request = adapter.build_request(
-            model="gemini-1.5-pro",
-            messages=messages,
-            stream=False
-        )
+        request = adapter.build_request(model="gemini-1.5-pro", messages=messages, stream=False)
 
         assert request.method == "POST"
         assert "generativelanguage.googleapis.com" in request.url
@@ -85,9 +81,7 @@ class TestBuildRequest:
     def test_build_request_with_temperature(self, adapter):
         """Test building request with temperature."""
         request = adapter.build_request(
-            model="gemini-1.5-pro",
-            messages=[{"role": "user", "content": "Hi"}],
-            temperature=0.7
+            model="gemini-1.5-pro", messages=[{"role": "user", "content": "Hi"}], temperature=0.7
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -96,9 +90,7 @@ class TestBuildRequest:
     def test_build_request_with_max_tokens(self, adapter):
         """Test building request with max_tokens."""
         request = adapter.build_request(
-            model="gemini-1.5-pro",
-            messages=[{"role": "user", "content": "Hi"}],
-            max_tokens=100
+            model="gemini-1.5-pro", messages=[{"role": "user", "content": "Hi"}], max_tokens=100
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -109,7 +101,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="gemini-1.5-pro",
             messages=[{"role": "user", "content": "What's the weather?"}],
-            tools=tool_definition
+            tools=tool_definition,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -121,9 +113,7 @@ class TestBuildRequest:
     def test_build_streaming_request(self, adapter):
         """Test building streaming request."""
         request = adapter.build_request(
-            model="gemini-1.5-pro",
-            messages=[{"role": "user", "content": "Hi"}],
-            stream=True
+            model="gemini-1.5-pro", messages=[{"role": "user", "content": "Hi"}], stream=True
         )
 
         # Gemini uses different endpoint for streaming
@@ -215,20 +205,20 @@ class TestParseResponse:
                             {
                                 "functionCall": {
                                     "name": "get_weather",
-                                    "args": {"location": "San Francisco"}
+                                    "args": {"location": "San Francisco"},
                                 }
                             }
                         ],
-                        "role": "model"
+                        "role": "model",
                     },
-                    "finishReason": "STOP"
+                    "finishReason": "STOP",
                 }
             ],
             "usageMetadata": {
                 "promptTokenCount": 50,
                 "candidatesTokenCount": 30,
-                "totalTokenCount": 80
-            }
+                "totalTokenCount": 80,
+            },
         }
 
         data = json.dumps(resp).encode("utf-8")
@@ -266,16 +256,9 @@ class TestParseStreamEvent:
 
     def test_parse_content_chunk(self, adapter):
         """Test parsing content chunk."""
-        event_data = json.dumps({
-            "candidates": [
-                {
-                    "content": {
-                        "parts": [{"text": "Hello"}],
-                        "role": "model"
-                    }
-                }
-            ]
-        })
+        event_data = json.dumps(
+            {"candidates": [{"content": {"parts": [{"text": "Hello"}], "role": "model"}}]}
+        )
         chunk = adapter.parse_stream_event(event_data, "gemini-1.5-pro")
 
         assert chunk is not None
@@ -283,14 +266,9 @@ class TestParseStreamEvent:
 
     def test_parse_finish_chunk(self, adapter):
         """Test parsing finish chunk."""
-        event_data = json.dumps({
-            "candidates": [
-                {
-                    "content": {"parts": [], "role": "model"},
-                    "finishReason": "STOP"
-                }
-            ]
-        })
+        event_data = json.dumps(
+            {"candidates": [{"content": {"parts": [], "role": "model"}, "finishReason": "STOP"}]}
+        )
         chunk = adapter.parse_stream_event(event_data, "gemini-1.5-pro")
 
         assert chunk is not None
@@ -308,19 +286,21 @@ class TestParseStreamEvent:
 
     def test_parse_stream_with_usage(self, adapter):
         """Test parsing stream chunk with usage."""
-        event_data = json.dumps({
-            "candidates": [
-                {
-                    "content": {"parts": [{"text": "Hi"}], "role": "model"},
-                    "finishReason": "STOP"
-                }
-            ],
-            "usageMetadata": {
-                "promptTokenCount": 10,
-                "candidatesTokenCount": 5,
-                "totalTokenCount": 15
+        event_data = json.dumps(
+            {
+                "candidates": [
+                    {
+                        "content": {"parts": [{"text": "Hi"}], "role": "model"},
+                        "finishReason": "STOP",
+                    }
+                ],
+                "usageMetadata": {
+                    "promptTokenCount": 10,
+                    "candidatesTokenCount": 5,
+                    "totalTokenCount": 15,
+                },
             }
-        })
+        )
         chunk = adapter.parse_stream_event(event_data, "gemini-1.5-pro")
 
         assert chunk is not None
@@ -340,12 +320,9 @@ class TestParseError:
 
     def test_parse_401_error(self, adapter):
         """Test parsing 401 authentication error."""
-        error_data = json.dumps({
-            "error": {
-                "message": "Invalid API key",
-                "status": "UNAUTHENTICATED"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"message": "Invalid API key", "status": "UNAUTHENTICATED"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(401, error_data, "req-123")
         assert isinstance(error, AuthenticationError)
@@ -353,12 +330,9 @@ class TestParseError:
 
     def test_parse_429_error(self, adapter):
         """Test parsing 429 rate limit error."""
-        error_data = json.dumps({
-            "error": {
-                "message": "Quota exceeded",
-                "status": "RESOURCE_EXHAUSTED"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"message": "Quota exceeded", "status": "RESOURCE_EXHAUSTED"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(429, error_data, "req-123")
         assert isinstance(error, RateLimitError)
