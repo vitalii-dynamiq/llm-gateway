@@ -1,0 +1,263 @@
+"""
+Tests for fastlitellm.types module.
+"""
+
+import pytest
+import json
+
+from fastlitellm.types import (
+    ModelResponse,
+    Choice,
+    Message,
+    ToolCall,
+    FunctionCall,
+    Usage,
+    StreamChunk,
+    ChunkChoice,
+    ChunkDelta,
+    EmbeddingResponse,
+    EmbeddingData,
+    EmbeddingUsage,
+    StreamingResponse,
+)
+
+
+class TestFunctionCall:
+    """Tests for FunctionCall dataclass."""
+
+    def test_create_function_call(self):
+        """Test basic FunctionCall creation."""
+        fc = FunctionCall(name="get_weather", arguments='{"location": "SF"}')
+        assert fc.name == "get_weather"
+        assert fc.arguments == '{"location": "SF"}'
+
+    def test_parse_arguments(self):
+        """Test parsing arguments JSON."""
+        fc = FunctionCall(name="get_weather", arguments='{"location": "SF", "unit": "celsius"}')
+        parsed = fc.parse_arguments()
+        assert parsed == {"location": "SF", "unit": "celsius"}
+
+    def test_parse_arguments_invalid_json(self):
+        """Test parsing invalid JSON raises ValueError."""
+        fc = FunctionCall(name="test", arguments="not valid json")
+        with pytest.raises(ValueError, match="Invalid JSON"):
+            fc.parse_arguments()
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        fc = FunctionCall(name="get_weather", arguments='{"location": "SF"}')
+        dumped = fc.model_dump()
+        assert dumped == {"name": "get_weather", "arguments": '{"location": "SF"}'}
+
+
+class TestToolCall:
+    """Tests for ToolCall dataclass."""
+
+    def test_create_tool_call(self):
+        """Test basic ToolCall creation."""
+        tc = ToolCall(
+            id="call_123",
+            type="function",
+            function=FunctionCall(name="test", arguments="{}")
+        )
+        assert tc.id == "call_123"
+        assert tc.type == "function"
+        assert tc.function is not None
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        tc = ToolCall(
+            id="call_123",
+            function=FunctionCall(name="test", arguments='{"x": 1}')
+        )
+        dumped = tc.model_dump()
+        assert dumped["id"] == "call_123"
+        assert dumped["type"] == "function"
+        assert dumped["function"]["name"] == "test"
+
+
+class TestMessage:
+    """Tests for Message dataclass."""
+
+    def test_create_simple_message(self):
+        """Test creating a simple message."""
+        msg = Message(role="assistant", content="Hello!")
+        assert msg.role == "assistant"
+        assert msg.content == "Hello!"
+        assert msg.tool_calls is None
+
+    def test_create_message_with_tool_calls(self):
+        """Test creating a message with tool calls."""
+        tc = ToolCall(id="call_1", function=FunctionCall(name="test", arguments="{}"))
+        msg = Message(role="assistant", content=None, tool_calls=[tc])
+        assert msg.content is None
+        assert len(msg.tool_calls) == 1
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        msg = Message(role="assistant", content="Hi")
+        dumped = msg.model_dump()
+        assert dumped == {"role": "assistant", "content": "Hi"}
+
+    def test_model_dump_with_tool_calls(self):
+        """Test model_dump with tool calls."""
+        tc = ToolCall(id="call_1", function=FunctionCall(name="test", arguments="{}"))
+        msg = Message(role="assistant", tool_calls=[tc])
+        dumped = msg.model_dump()
+        assert "tool_calls" in dumped
+        assert len(dumped["tool_calls"]) == 1
+
+
+class TestUsage:
+    """Tests for Usage dataclass."""
+
+    def test_create_usage(self):
+        """Test basic Usage creation."""
+        usage = Usage(prompt_tokens=10, completion_tokens=20, total_tokens=30)
+        assert usage.prompt_tokens == 10
+        assert usage.completion_tokens == 20
+        assert usage.total_tokens == 30
+
+    def test_default_values(self):
+        """Test default values are 0."""
+        usage = Usage()
+        assert usage.prompt_tokens == 0
+        assert usage.completion_tokens == 0
+        assert usage.total_tokens == 0
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        usage = Usage(prompt_tokens=10, completion_tokens=20, total_tokens=30)
+        dumped = usage.model_dump()
+        assert dumped == {
+            "prompt_tokens": 10,
+            "completion_tokens": 20,
+            "total_tokens": 30
+        }
+
+
+class TestChoice:
+    """Tests for Choice dataclass."""
+
+    def test_create_choice(self):
+        """Test basic Choice creation."""
+        msg = Message(role="assistant", content="Hello")
+        choice = Choice(index=0, message=msg, finish_reason="stop")
+        assert choice.index == 0
+        assert choice.message.content == "Hello"
+        assert choice.finish_reason == "stop"
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        msg = Message(role="assistant", content="Hi")
+        choice = Choice(index=0, message=msg, finish_reason="stop")
+        dumped = choice.model_dump()
+        assert dumped["index"] == 0
+        assert dumped["message"]["content"] == "Hi"
+        assert dumped["finish_reason"] == "stop"
+
+
+class TestModelResponse:
+    """Tests for ModelResponse dataclass."""
+
+    def test_create_model_response(self):
+        """Test basic ModelResponse creation."""
+        msg = Message(role="assistant", content="Hello")
+        choice = Choice(index=0, message=msg, finish_reason="stop")
+        usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
+
+        response = ModelResponse(
+            id="resp-123",
+            model="gpt-4o-mini",
+            choices=[choice],
+            usage=usage
+        )
+
+        assert response.id == "resp-123"
+        assert response.model == "gpt-4o-mini"
+        assert len(response.choices) == 1
+        assert response.choices[0].message.content == "Hello"
+        assert response.usage.total_tokens == 15
+
+    def test_model_extra_contains_usage(self):
+        """Test that model_extra is populated with usage."""
+        usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
+        response = ModelResponse(
+            id="resp-123",
+            choices=[],
+            usage=usage
+        )
+        assert "usage" in response.model_extra
+        assert response.model_extra["usage"]["total_tokens"] == 15
+
+    def test_model_dump(self):
+        """Test model_dump serialization."""
+        msg = Message(role="assistant", content="Hi")
+        choice = Choice(index=0, message=msg, finish_reason="stop")
+        response = ModelResponse(
+            id="resp-123",
+            model="gpt-4o-mini",
+            choices=[choice]
+        )
+        dumped = response.model_dump()
+        assert dumped["id"] == "resp-123"
+        assert dumped["model"] == "gpt-4o-mini"
+        assert len(dumped["choices"]) == 1
+
+
+class TestStreamChunk:
+    """Tests for StreamChunk dataclass."""
+
+    def test_create_stream_chunk(self):
+        """Test basic StreamChunk creation."""
+        delta = ChunkDelta(content="Hello")
+        choice = ChunkChoice(index=0, delta=delta)
+        chunk = StreamChunk(id="chunk-1", model="gpt-4o-mini", choices=[choice])
+
+        assert chunk.id == "chunk-1"
+        assert chunk.choices[0].delta.content == "Hello"
+
+    def test_chunk_with_usage(self):
+        """Test chunk with usage (include_usage=True)."""
+        usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
+        chunk = StreamChunk(
+            id="chunk-1",
+            model="gpt-4o-mini",
+            choices=[],
+            usage=usage
+        )
+        assert chunk.usage is not None
+        assert chunk.usage.total_tokens == 15
+
+
+class TestEmbedding:
+    """Tests for embedding types."""
+
+    def test_create_embedding_data(self):
+        """Test EmbeddingData creation."""
+        data = EmbeddingData(index=0, embedding=[0.1, 0.2, 0.3])
+        assert data.index == 0
+        assert len(data.embedding) == 3
+
+    def test_create_embedding_response(self):
+        """Test EmbeddingResponse creation."""
+        data = [
+            EmbeddingData(index=0, embedding=[0.1, 0.2]),
+            EmbeddingData(index=1, embedding=[0.3, 0.4])
+        ]
+        usage = EmbeddingUsage(prompt_tokens=10, total_tokens=10)
+        response = EmbeddingResponse(
+            model="text-embedding-3-small",
+            data=data,
+            usage=usage
+        )
+        assert response.model == "text-embedding-3-small"
+        assert len(response.data) == 2
+        assert response.usage.prompt_tokens == 10
+
+    def test_embedding_model_dump(self):
+        """Test embedding model_dump."""
+        data = EmbeddingData(index=0, embedding=[0.1, 0.2])
+        dumped = data.model_dump()
+        assert dumped["index"] == 0
+        assert dumped["embedding"] == [0.1, 0.2]

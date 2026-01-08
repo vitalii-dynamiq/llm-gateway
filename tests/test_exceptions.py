@@ -1,0 +1,245 @@
+"""
+Tests for fastlitellm.exceptions module.
+"""
+
+import pytest
+
+from fastlitellm.exceptions import (
+    FastLiteLLMError,
+    AuthenticationError,
+    RateLimitError,
+    TimeoutError,
+    ProviderAPIError,
+    UnsupportedModelError,
+    UnsupportedParameterError,
+    ResponseParseError,
+    ContentFilterError,
+    InvalidRequestError,
+    ConnectionError,
+    map_status_code_to_exception,
+)
+
+
+class TestFastLiteLLMError:
+    """Tests for base exception class."""
+
+    def test_basic_error(self):
+        """Test basic error creation."""
+        error = FastLiteLLMError("Something went wrong")
+        assert str(error) == "Something went wrong"
+        assert error.message == "Something went wrong"
+
+    def test_error_with_metadata(self):
+        """Test error with metadata."""
+        error = FastLiteLLMError(
+            "API error",
+            provider="openai",
+            model="gpt-4",
+            status_code=500,
+            request_id="req-123"
+        )
+        assert error.provider == "openai"
+        assert error.model == "gpt-4"
+        assert error.status_code == 500
+        assert error.request_id == "req-123"
+
+    def test_str_includes_metadata(self):
+        """Test string representation includes metadata."""
+        error = FastLiteLLMError(
+            "API error",
+            provider="openai",
+            status_code=500
+        )
+        error_str = str(error)
+        assert "API error" in error_str
+        assert "provider=openai" in error_str
+        assert "status_code=500" in error_str
+
+    def test_repr(self):
+        """Test repr includes all fields."""
+        error = FastLiteLLMError(
+            "Test",
+            provider="openai",
+            model="gpt-4"
+        )
+        repr_str = repr(error)
+        assert "FastLiteLLMError" in repr_str
+        assert "openai" in repr_str
+
+
+class TestAuthenticationError:
+    """Tests for AuthenticationError."""
+
+    def test_authentication_error(self):
+        """Test authentication error creation."""
+        error = AuthenticationError(
+            "Invalid API key",
+            provider="openai",
+            status_code=401
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.status_code == 401
+
+
+class TestRateLimitError:
+    """Tests for RateLimitError."""
+
+    def test_rate_limit_error(self):
+        """Test rate limit error creation."""
+        error = RateLimitError(
+            "Rate limit exceeded",
+            retry_after=30.0,
+            provider="openai",
+            status_code=429
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.retry_after == 30.0
+
+
+class TestTimeoutError:
+    """Tests for TimeoutError."""
+
+    def test_timeout_error(self):
+        """Test timeout error creation."""
+        error = TimeoutError(
+            "Request timed out",
+            timeout_type="read",
+            timeout_seconds=30.0,
+            provider="openai"
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.timeout_type == "read"
+        assert error.timeout_seconds == 30.0
+
+
+class TestProviderAPIError:
+    """Tests for ProviderAPIError."""
+
+    def test_provider_api_error(self):
+        """Test provider API error creation."""
+        error = ProviderAPIError(
+            "Server error",
+            error_type="server_error",
+            error_code="500",
+            provider="openai",
+            status_code=500
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.error_type == "server_error"
+        assert error.error_code == "500"
+
+
+class TestUnsupportedModelError:
+    """Tests for UnsupportedModelError."""
+
+    def test_unsupported_model_error(self):
+        """Test unsupported model error creation."""
+        error = UnsupportedModelError(
+            "Model not found",
+            model="gpt-5-turbo",
+            provider="openai",
+            status_code=404
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.model == "gpt-5-turbo"
+
+
+class TestUnsupportedParameterError:
+    """Tests for UnsupportedParameterError."""
+
+    def test_unsupported_parameter_error(self):
+        """Test unsupported parameter error creation."""
+        error = UnsupportedParameterError(
+            "Unsupported parameters",
+            unsupported_params=["foo", "bar"],
+            provider="anthropic"
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.unsupported_params == ["foo", "bar"]
+
+
+class TestResponseParseError:
+    """Tests for ResponseParseError."""
+
+    def test_response_parse_error(self):
+        """Test response parse error creation."""
+        error = ResponseParseError(
+            "Invalid JSON",
+            raw_data=b"not json",
+            provider="openai"
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.raw_data == b"not json"
+
+
+class TestContentFilterError:
+    """Tests for ContentFilterError."""
+
+    def test_content_filter_error(self):
+        """Test content filter error creation."""
+        error = ContentFilterError(
+            "Content blocked",
+            filter_reason="violence",
+            provider="openai"
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.filter_reason == "violence"
+
+
+class TestInvalidRequestError:
+    """Tests for InvalidRequestError."""
+
+    def test_invalid_request_error(self):
+        """Test invalid request error creation."""
+        error = InvalidRequestError(
+            "Invalid parameter value",
+            param="temperature",
+            provider="openai",
+            status_code=400
+        )
+        assert isinstance(error, FastLiteLLMError)
+        assert error.param == "temperature"
+
+
+class TestMapStatusCode:
+    """Tests for map_status_code_to_exception helper."""
+
+    def test_map_401_to_auth_error(self):
+        """Test 401 maps to AuthenticationError."""
+        error = map_status_code_to_exception(401, "Unauthorized")
+        assert isinstance(error, AuthenticationError)
+
+    def test_map_403_to_auth_error(self):
+        """Test 403 maps to AuthenticationError."""
+        error = map_status_code_to_exception(403, "Forbidden")
+        assert isinstance(error, AuthenticationError)
+
+    def test_map_429_to_rate_limit(self):
+        """Test 429 maps to RateLimitError."""
+        error = map_status_code_to_exception(429, "Too Many Requests")
+        assert isinstance(error, RateLimitError)
+
+    def test_map_404_to_unsupported_model(self):
+        """Test 404 maps to UnsupportedModelError."""
+        error = map_status_code_to_exception(404, "Not Found")
+        assert isinstance(error, UnsupportedModelError)
+
+    def test_map_400_to_invalid_request(self):
+        """Test 400 maps to InvalidRequestError."""
+        error = map_status_code_to_exception(400, "Bad Request")
+        assert isinstance(error, InvalidRequestError)
+
+    def test_map_408_to_timeout(self):
+        """Test 408 maps to TimeoutError."""
+        error = map_status_code_to_exception(408, "Request Timeout")
+        assert isinstance(error, TimeoutError)
+
+    def test_map_500_to_provider_error(self):
+        """Test 500 maps to ProviderAPIError."""
+        error = map_status_code_to_exception(500, "Server Error")
+        assert isinstance(error, ProviderAPIError)
+
+    def test_map_unknown_to_provider_error(self):
+        """Test unknown status maps to ProviderAPIError."""
+        error = map_status_code_to_exception(418, "I'm a teapot")
+        assert isinstance(error, ProviderAPIError)
