@@ -1,5 +1,5 @@
 """
-Tests for async functionality in fastlitellm.core module.
+Tests for async functionality in arcllm.core module.
 
 Tests acompletion and aembedding with mocked async HTTP.
 """
@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from fastlitellm.core import acompletion, aembedding
-from fastlitellm.http.async_client import AsyncHTTPResponse
+from arcllm.core import acompletion, aembedding
+from arcllm.http.async_client import AsyncHTTPResponse
 
 
 class TestACompletion:
@@ -58,7 +58,7 @@ class TestACompletion:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_async_http_client", return_value=mock_client),
+            patch("arcllm.core._get_async_http_client", return_value=mock_client),
         ):
             response = await acompletion(
                 model="gpt-4o-mini",
@@ -83,7 +83,7 @@ class TestACompletion:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_async_http_client", return_value=mock_client),
+            patch("arcllm.core._get_async_http_client", return_value=mock_client),
         ):
             await acompletion(
                 model="gpt-4o-mini",
@@ -129,7 +129,7 @@ class TestAEmbedding:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_async_http_client", return_value=mock_client),
+            patch("arcllm.core._get_async_http_client", return_value=mock_client),
         ):
             response = await aembedding(
                 model="text-embedding-3-small",
@@ -161,7 +161,7 @@ class TestAEmbedding:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_async_http_client", return_value=mock_client),
+            patch("arcllm.core._get_async_http_client", return_value=mock_client),
         ):
             response = await aembedding(
                 model="text-embedding-3-small",
@@ -193,7 +193,7 @@ class TestAsyncStreaming:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_async_http_client", return_value=mock_client),
+            patch("arcllm.core._get_async_http_client", return_value=mock_client),
         ):
             result = await acompletion(
                 model="gpt-4o-mini",

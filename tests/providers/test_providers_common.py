@@ -13,12 +13,12 @@ from unittest.mock import patch
 
 import pytest
 
-from fastlitellm.exceptions import (
-    FastLiteLLMError,
+from arcllm.exceptions import (
+    ArcLLMError,
     UnsupportedModelError,
     UnsupportedParameterError,
 )
-from fastlitellm.providers.base import (
+from arcllm.providers.base import (
     COMMON_PARAMS,
     SUPPORTED_PROVIDERS,
     BaseAdapter,
@@ -309,8 +309,8 @@ class _MockAdapter(BaseAdapter):
 
     def parse_error(
         self, status_code: int, data: bytes, request_id: str | None = None
-    ) -> FastLiteLLMError:
-        return FastLiteLLMError("test error")
+    ) -> ArcLLMError:
+        return ArcLLMError("test error")
 
 
 class TestBaseAdapterParamChecking:
@@ -380,7 +380,7 @@ class TestBaseAdapterParamChecking:
         adapter = _MockAdapter(config)
 
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(FastLiteLLMError) as exc_info:
+            with pytest.raises(ArcLLMError) as exc_info:
                 adapter._get_api_key("MISSING_API_KEY")
 
             assert "MISSING_API_KEY" in str(exc_info.value)

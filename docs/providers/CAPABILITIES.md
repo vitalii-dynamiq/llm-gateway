@@ -1,6 +1,6 @@
 # Provider Capability Matrix
 
-This document lists the capabilities supported by each provider adapter in fastlitellm.
+This document lists the capabilities supported by each provider adapter in arcllm.
 
 ## Feature Support by Provider
 

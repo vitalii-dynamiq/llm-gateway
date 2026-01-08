@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from fastlitellm.providers.base import ProviderConfig
+from arcllm.providers.base import ProviderConfig
 
 
 class TestDeepSeekAdapter:
@@ -20,7 +20,7 @@ class TestDeepSeekAdapter:
     @pytest.fixture
     def adapter(self):
         """Create DeepSeek adapter with test key."""
-        from fastlitellm.providers.deepseek_adapter import DeepSeekAdapter
+        from arcllm.providers.deepseek_adapter import DeepSeekAdapter
 
         config = ProviderConfig(api_key="test-key")
         return DeepSeekAdapter(config)
@@ -50,7 +50,7 @@ class TestFireworksAdapter:
     @pytest.fixture
     def adapter(self):
         """Create Fireworks adapter with test key."""
-        from fastlitellm.providers.fireworks_adapter import FireworksAdapter
+        from arcllm.providers.fireworks_adapter import FireworksAdapter
 
         config = ProviderConfig(api_key="test-key")
         return FireworksAdapter(config)
@@ -78,7 +78,7 @@ class TestTogetherAdapter:
     @pytest.fixture
     def adapter(self):
         """Create Together adapter with test key."""
-        from fastlitellm.providers.together_adapter import TogetherAdapter
+        from arcllm.providers.together_adapter import TogetherAdapter
 
         config = ProviderConfig(api_key="test-key")
         return TogetherAdapter(config)
@@ -106,7 +106,7 @@ class TestGroqAdapter:
     @pytest.fixture
     def adapter(self):
         """Create Groq adapter with test key."""
-        from fastlitellm.providers.groq_adapter import GroqAdapter
+        from arcllm.providers.groq_adapter import GroqAdapter
 
         config = ProviderConfig(api_key="test-key")
         return GroqAdapter(config)
@@ -136,7 +136,7 @@ class TestPerplexityAdapter:
     @pytest.fixture
     def adapter(self):
         """Create Perplexity adapter with test key."""
-        from fastlitellm.providers.perplexity_adapter import PerplexityAdapter
+        from arcllm.providers.perplexity_adapter import PerplexityAdapter
 
         config = ProviderConfig(api_key="test-key")
         return PerplexityAdapter(config)
@@ -163,7 +163,7 @@ class TestCapabilitiesExtended:
 
     def test_get_model_capabilities_all_providers(self):
         """Test capabilities for models from all providers."""
-        from fastlitellm.capabilities import get_model_capabilities
+        from arcllm.capabilities import get_model_capabilities
 
         models = [
             "gpt-4o",
@@ -180,7 +180,7 @@ class TestCapabilitiesExtended:
 
     def test_default_capabilities(self):
         """Test default capabilities for unknown models."""
-        from fastlitellm.capabilities.tables import DEFAULT_CAPABILITIES
+        from arcllm.capabilities.tables import DEFAULT_CAPABILITIES
 
         assert DEFAULT_CAPABILITIES.max_tokens == 4096
         assert DEFAULT_CAPABILITIES.context_window == 8192
@@ -188,7 +188,7 @@ class TestCapabilitiesExtended:
 
     def test_capabilities_version(self):
         """Test capabilities version is defined."""
-        from fastlitellm.capabilities import CAPABILITIES_VERSION
+        from arcllm.capabilities import CAPABILITIES_VERSION
 
         assert CAPABILITIES_VERSION is not None
         assert len(CAPABILITIES_VERSION) > 0
@@ -199,7 +199,7 @@ class TestBaseProviderRegister:
 
     def test_register_all_providers_idempotent(self):
         """Test that register_all_providers can be called multiple times."""
-        from fastlitellm.providers.base import _PROVIDERS, register_all_providers
+        from arcllm.providers.base import _PROVIDERS, register_all_providers
 
         initial_count = len(_PROVIDERS)
         register_all_providers()

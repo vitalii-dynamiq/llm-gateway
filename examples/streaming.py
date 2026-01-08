@@ -1,10 +1,10 @@
 """
-Streaming completion example for fastlitellm.
+Streaming completion example for arcllm.
 
 This example demonstrates streaming responses with usage tracking.
 """
 
-import fastlitellm
+import arcllm
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     print("Streaming response:\n")
 
     # Stream with usage included
-    stream = fastlitellm.completion(
+    stream = arcllm.completion(
         model="gpt-4o-mini",
         messages=[
             {"role": "user", "content": "Write a short poem about coding."},
@@ -45,7 +45,7 @@ def main():
 
     # Build complete response from chunks
     print("\n--- Building complete response from chunks ---")
-    complete_response = fastlitellm.stream_chunk_builder(chunks)
+    complete_response = arcllm.stream_chunk_builder(chunks)
     print(f"Complete content: {complete_response.choices[0].message.content[:100]}...")
 
 
@@ -53,7 +53,7 @@ async def async_streaming():
     """Async streaming example."""
     print("Async streaming response:\n")
 
-    stream = await fastlitellm.acompletion(
+    stream = await arcllm.acompletion(
         model="gpt-4o-mini",
         messages=[
             {"role": "user", "content": "Count from 1 to 5."},

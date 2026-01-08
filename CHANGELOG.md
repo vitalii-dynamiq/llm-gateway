@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of fastlitellm
+- Initial release of arcllm
 - Core API functions:
   - `completion()` - Synchronous chat completion
   - `acompletion()` - Asynchronous chat completion
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `supports_tools()` - Check tool calling support
   - `supports_structured_output()` - Check JSON mode support
 - Exception hierarchy:
-  - `FastLiteLLMError` (base)
+  - `ArcLLMError` (base)
   - `AuthenticationError`
   - `RateLimitError`
   - `TimeoutError`

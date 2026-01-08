@@ -1,6 +1,6 @@
 # Provider Model Matrix
 
-This document lists the supported models, capabilities, and required credentials for each provider in fastlitellm.
+This document lists the supported models, capabilities, and required credentials for each provider in arcllm.
 
 **Last Updated:** 2025-01-08
 
@@ -414,7 +414,7 @@ For CI integration tests, we use the smallest/cheapest models that still support
 ## Notes
 
 1. **Streaming**: All providers support SSE streaming for chat completions.
-2. **Tool Calling**: Format varies by provider; fastlitellm normalizes to OpenAI format.
+2. **Tool Calling**: Format varies by provider; arcllm normalizes to OpenAI format.
 3. **Structured Output**: JSON mode support varies; some providers require specific prompting.
 4. **Usage Reporting**: All providers report token usage; streaming usage requires `include_usage` option where supported.
 5. **Rate Limits**: CI tests include retry logic to handle rate limiting. See [CI_RELIABILITY.md](CI_RELIABILITY.md) for details.

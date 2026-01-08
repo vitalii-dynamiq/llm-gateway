@@ -1,11 +1,11 @@
 """
-Tool calling example for fastlitellm.
+Tool calling example for arcllm.
 
 This example demonstrates function/tool calling with the unified API.
 """
 
 import json
-import fastlitellm
+import arcllm
 
 
 # Define tools
@@ -72,7 +72,7 @@ def search_web(query: str) -> str:
     })
 
 
-def execute_tool(tool_call: fastlitellm.ToolCall) -> str:
+def execute_tool(tool_call: arcllm.ToolCall) -> str:
     """Execute a tool call and return the result."""
     name = tool_call.function.name
     args = tool_call.function.parse_arguments()
@@ -95,7 +95,7 @@ def main():
     print("User: What's the weather like in San Francisco?\n")
 
     # First call - model decides to use tools
-    response = fastlitellm.completion(
+    response = arcllm.completion(
         model="gpt-4o-mini",
         messages=messages,
         tools=tools,
@@ -134,7 +134,7 @@ def main():
 
         # Second call - model processes tool results
         print("\n--- Getting final response ---\n")
-        final_response = fastlitellm.completion(
+        final_response = arcllm.completion(
             model="gpt-4o-mini",
             messages=messages,
             tools=tools,
@@ -153,7 +153,7 @@ def streaming_tool_calls():
         {"role": "user", "content": "What's the weather in Tokyo?"},
     ]
 
-    stream = fastlitellm.completion(
+    stream = arcllm.completion(
         model="gpt-4o-mini",
         messages=messages,
         tools=tools,
@@ -180,7 +180,7 @@ def streaming_tool_calls():
     print()
 
     # Build complete response
-    response = fastlitellm.stream_chunk_builder(chunks)
+    response = arcllm.stream_chunk_builder(chunks)
     if response.choices[0].message.tool_calls:
         print(f"\nComplete tool calls: {len(response.choices[0].message.tool_calls)}")
         for tc in response.choices[0].message.tool_calls:

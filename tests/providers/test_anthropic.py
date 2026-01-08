@@ -8,13 +8,13 @@ from unittest.mock import patch
 
 import pytest
 
-from fastlitellm.exceptions import (
+from arcllm.exceptions import (
     AuthenticationError,
     RateLimitError,
     ResponseParseError,
 )
-from fastlitellm.providers.anthropic_adapter import AnthropicAdapter
-from fastlitellm.providers.base import ProviderConfig
+from arcllm.providers.anthropic_adapter import AnthropicAdapter
+from arcllm.providers.base import ProviderConfig
 
 
 class TestAnthropicAdapter:

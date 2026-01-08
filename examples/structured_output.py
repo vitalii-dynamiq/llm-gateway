@@ -1,18 +1,18 @@
 """
-Structured output example for fastlitellm.
+Structured output example for arcllm.
 
 This example demonstrates JSON mode and JSON schema structured output.
 """
 
 import json
-import fastlitellm
+import arcllm
 
 
 def json_mode_example():
     """Example using JSON mode."""
     print("=== JSON Mode Example ===\n")
 
-    response = fastlitellm.completion(
+    response = arcllm.completion(
         model="gpt-4o-mini",
         messages=[
             {
@@ -54,7 +54,7 @@ def json_schema_example():
         "required": ["name", "age", "email", "interests"],
     }
 
-    response = fastlitellm.completion(
+    response = arcllm.completion(
         model="gpt-4o-mini",
         messages=[
             {
@@ -122,7 +122,7 @@ def extract_entities_example():
         "required": ["person", "company"],
     }
 
-    response = fastlitellm.completion(
+    response = arcllm.completion(
         model="gpt-4o-mini",
         messages=[
             {

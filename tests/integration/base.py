@@ -41,7 +41,7 @@ class IntegrationTestBase:
 
     def retry_on_rate_limit(self, func, *args, **kwargs) -> Any:
         """Execute function with retry on rate limit errors."""
-        from fastlitellm.exceptions import RateLimitError
+        from arcllm.exceptions import RateLimitError
 
         last_error = None
         for attempt in range(self.MAX_RETRIES):
@@ -58,7 +58,7 @@ class IntegrationTestBase:
         """Execute async function with retry on rate limit errors."""
         import asyncio
 
-        from fastlitellm.exceptions import RateLimitError
+        from arcllm.exceptions import RateLimitError
 
         last_error = None
         for attempt in range(self.MAX_RETRIES):
@@ -77,7 +77,7 @@ class IntegrationTestBase:
 
     def test_simple_completion(self) -> None:
         """Test basic chat completion."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -96,7 +96,7 @@ class IntegrationTestBase:
     @pytest.mark.asyncio
     async def test_async_completion(self) -> None:
         """Test async chat completion."""
-        from fastlitellm import acompletion
+        from arcllm import acompletion
 
         response = await self.retry_on_rate_limit_async(
             acompletion,
@@ -118,7 +118,7 @@ class IntegrationTestBase:
         if not self.SUPPORTS_STREAMING:
             pytest.skip(f"{self.PROVIDER} does not support streaming")
 
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -147,7 +147,7 @@ class IntegrationTestBase:
         if not self.SUPPORTS_STREAMING:
             pytest.skip(f"{self.PROVIDER} does not support streaming")
 
-        from fastlitellm import completion, stream_chunk_builder
+        from arcllm import completion, stream_chunk_builder
 
         response = self.retry_on_rate_limit(
             completion,
@@ -174,7 +174,7 @@ class IntegrationTestBase:
         if not self.SUPPORTS_TOOLS:
             pytest.skip(f"{self.PROVIDER} does not support tool calling")
 
-        from fastlitellm import completion
+        from arcllm import completion
 
         tools = [
             {
@@ -233,7 +233,7 @@ class IntegrationTestBase:
         if not self.SUPPORTS_STRUCTURED_OUTPUT:
             pytest.skip(f"{self.PROVIDER} does not support structured output")
 
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -265,7 +265,7 @@ class IntegrationTestBase:
 
     def test_usage_reporting(self) -> None:
         """Test that usage information is reported."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -289,7 +289,7 @@ class IntegrationTestBase:
         if not self.SUPPORTS_EMBEDDINGS or not self.EMBEDDING_MODEL:
             pytest.skip(f"{self.PROVIDER} does not support embeddings")
 
-        from fastlitellm import embedding
+        from arcllm import embedding
 
         response = self.retry_on_rate_limit(
             embedding,
@@ -310,10 +310,10 @@ class IntegrationTestBase:
 
     def test_invalid_model_error(self) -> None:
         """Test that invalid model raises appropriate error."""
-        from fastlitellm import completion
-        from fastlitellm.exceptions import FastLiteLLMError
+        from arcllm import completion
+        from arcllm.exceptions import ArcLLMError
 
-        with pytest.raises(FastLiteLLMError):
+        with pytest.raises(ArcLLMError):
             completion(
                 model=f"{self.PROVIDER}/nonexistent-model-xyz123",
                 messages=[{"role": "user", "content": "Hi"}],

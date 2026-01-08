@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import pytest
 
-from fastlitellm.pricing import (
+from arcllm.pricing import (
     completion_cost,
     cost_per_token,
     get_model_pricing,
 )
-from fastlitellm.pricing.tables import (
+from arcllm.pricing.tables import (
     ALL_PRICING,
     ANTHROPIC_PRICING,
     COHERE_PRICING,
@@ -30,7 +30,7 @@ from fastlitellm.pricing.tables import (
     UnknownModelPricingError,
     _normalize_model_name,
 )
-from fastlitellm.types import ModelResponse, Usage
+from arcllm.types import ModelResponse, Usage
 
 
 class TestModelNormalization:

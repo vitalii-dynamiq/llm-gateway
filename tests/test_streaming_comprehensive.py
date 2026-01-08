@@ -1,5 +1,5 @@
 """
-Comprehensive streaming tests for fastlitellm.
+Comprehensive streaming tests for arcllm.
 
 Tests SSE parsing, streaming edge cases, tool call deltas,
 final chunk handling, and usage reporting in streams.
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from fastlitellm.http.sse import AsyncSSEParser, SSEEvent, SSEParser
+from arcllm.http.sse import AsyncSSEParser, SSEEvent, SSEParser
 
 
 class TestSSEParserPartialChunks:

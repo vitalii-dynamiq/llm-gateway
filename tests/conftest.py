@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for fastlitellm tests.
+Pytest configuration and shared fixtures for arcllm tests.
 """
 
 import json

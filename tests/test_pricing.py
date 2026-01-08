@@ -1,18 +1,18 @@
 """
-Tests for fastlitellm.pricing module.
+Tests for arcllm.pricing module.
 """
 
 import pytest
 
-from fastlitellm.pricing import (
+from arcllm.pricing import (
     PRICING_VERSION,
     ModelPricing,
     completion_cost,
     cost_per_token,
     get_model_pricing,
 )
-from fastlitellm.pricing.tables import UnknownModelPricingError
-from fastlitellm.types import Choice, Message, ModelResponse, Usage
+from arcllm.pricing.tables import UnknownModelPricingError
+from arcllm.types import Choice, Message, ModelResponse, Usage
 
 
 class TestGetModelPricing:

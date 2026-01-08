@@ -30,7 +30,7 @@ When reporting a vulnerability, please include:
 
 ## Security Best Practices
 
-When using fastlitellm:
+When using arcllm:
 
 ### API Key Management
 
@@ -51,19 +51,19 @@ When using fastlitellm:
 
 ### Network Security
 
-- fastlitellm uses HTTPS for all provider communications
+- arcllm uses HTTPS for all provider communications
 - TLS certificate verification is enabled by default
 - Consider network-level controls for production deployments
 
 ### Logging
 
-- fastlitellm does not log API keys or sensitive content by default
+- arcllm does not log API keys or sensitive content by default
 - Be careful when enabling debug logging in production
 - Do not log full request/response bodies in production
 
 ### Dependency Security
 
-fastlitellm has **zero runtime dependencies** by design, which significantly reduces supply chain risk. For development dependencies, we:
+arcllm has **zero runtime dependencies** by design, which significantly reduces supply chain risk. For development dependencies, we:
 
 - Use pinned versions in `pyproject.toml`
 - Regularly update to patched versions

@@ -1,10 +1,10 @@
 # Performance Guide
 
-This document explains fastlitellm's performance characteristics, optimization strategies, and how to maintain performance over time.
+This document explains arcllm's performance characteristics, optimization strategies, and how to maintain performance over time.
 
 ## Design Principles
 
-fastlitellm is designed for **minimal overhead** on top of network latency:
+arcllm is designed for **minimal overhead** on top of network latency:
 
 1. **Zero runtime dependencies** - No third-party packages at runtime
 2. **Minimal allocations** - Use `__slots__`, pre-allocated structures
@@ -111,7 +111,7 @@ python benchmarks/benchmark_ci.py
 import cProfile
 import pstats
 
-from fastlitellm.http.sse import SSEParser
+from arcllm.http.sse import SSEParser
 
 def profile_sse():
     parser = SSEParser()
@@ -153,7 +153,7 @@ stats.sort_stats('cumulative').print_stats(20)
 
 ## Memory Usage
 
-fastlitellm is designed to be memory-efficient:
+arcllm is designed to be memory-efficient:
 
 | Component | Memory Strategy |
 |-----------|-----------------|
@@ -207,9 +207,9 @@ If any threshold is exceeded, the CI job fails.
 
 ## Comparing to LiteLLM
 
-fastlitellm aims for significantly lower overhead than LiteLLM:
+arcllm aims for significantly lower overhead than LiteLLM:
 
-| Metric | fastlitellm | LiteLLM |
+| Metric | arcllm | LiteLLM |
 |--------|-------------|---------|
 | Import time | ~200ms | ~2-5s |
 | Runtime deps | 0 | 50+ |
@@ -238,7 +238,7 @@ For production monitoring:
 
 ```python
 import time
-from fastlitellm import completion
+from arcllm import completion
 
 start = time.perf_counter()
 response = completion(model="gpt-4o-mini", messages=[...])

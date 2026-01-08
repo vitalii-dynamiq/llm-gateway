@@ -1,8 +1,8 @@
 """
-Tests for fastlitellm.http.sse module.
+Tests for arcllm.http.sse module.
 """
 
-from fastlitellm.http.sse import SSEEvent, SSEParser, parse_sse_stream
+from arcllm.http.sse import SSEEvent, SSEParser, parse_sse_stream
 
 
 class TestSSEEvent:

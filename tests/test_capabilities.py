@@ -1,10 +1,10 @@
 """
-Tests for fastlitellm.capabilities module.
+Tests for arcllm.capabilities module.
 """
 
 import pytest
 
-from fastlitellm.capabilities import (
+from arcllm.capabilities import (
     CAPABILITIES_VERSION,
     ModelCapabilities,
     get_max_tokens,

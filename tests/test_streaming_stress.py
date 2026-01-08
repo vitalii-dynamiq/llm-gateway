@@ -1,5 +1,5 @@
 """
-Streaming stress tests for fastlitellm.
+Streaming stress tests for arcllm.
 
 Tests edge cases and robustness of streaming parsers:
 - Tiny chunks (single byte)
@@ -20,8 +20,8 @@ from typing import Any
 
 import pytest
 
-from fastlitellm.http.sse import AsyncSSEParser, SSEParser
-from fastlitellm.types import StreamChunk
+from arcllm.http.sse import AsyncSSEParser, SSEParser
+from arcllm.types import StreamChunk
 
 # =============================================================================
 # Test Fixtures
@@ -253,8 +253,8 @@ class TestOpenAIStreamingFormat:
 
     def test_basic_content_stream(self) -> None:
         """Test basic content streaming."""
-        from fastlitellm.providers.base import ProviderConfig
-        from fastlitellm.providers.openai_adapter import OpenAIAdapter
+        from arcllm.providers.base import ProviderConfig
+        from arcllm.providers.openai_adapter import OpenAIAdapter
 
         config = ProviderConfig(api_key="test")
         adapter = OpenAIAdapter(config)
@@ -284,8 +284,8 @@ class TestOpenAIStreamingFormat:
 
     def test_tool_call_deltas(self) -> None:
         """Test streaming tool call deltas."""
-        from fastlitellm.providers.base import ProviderConfig
-        from fastlitellm.providers.openai_adapter import OpenAIAdapter
+        from arcllm.providers.base import ProviderConfig
+        from arcllm.providers.openai_adapter import OpenAIAdapter
 
         config = ProviderConfig(api_key="test")
         adapter = OpenAIAdapter(config)
@@ -352,8 +352,8 @@ class TestOpenAIStreamingFormat:
 
     def test_include_usage_final_chunk(self) -> None:
         """Test include_usage in final chunk."""
-        from fastlitellm.providers.base import ProviderConfig
-        from fastlitellm.providers.openai_adapter import OpenAIAdapter
+        from arcllm.providers.base import ProviderConfig
+        from arcllm.providers.openai_adapter import OpenAIAdapter
 
         config = ProviderConfig(api_key="test")
         adapter = OpenAIAdapter(config)
@@ -431,8 +431,8 @@ class TestStreamingLatency:
 
     def test_time_to_first_token(self) -> None:
         """Measure and verify time-to-first-token is minimal."""
-        from fastlitellm.providers.base import ProviderConfig
-        from fastlitellm.providers.openai_adapter import OpenAIAdapter
+        from arcllm.providers.base import ProviderConfig
+        from arcllm.providers.openai_adapter import OpenAIAdapter
 
         config = ProviderConfig(api_key="test")
         adapter = OpenAIAdapter(config)
@@ -458,8 +458,8 @@ class TestStreamingLatency:
 
     def test_per_chunk_overhead(self) -> None:
         """Measure and verify per-chunk processing overhead."""
-        from fastlitellm.providers.base import ProviderConfig
-        from fastlitellm.providers.openai_adapter import OpenAIAdapter
+        from arcllm.providers.base import ProviderConfig
+        from arcllm.providers.openai_adapter import OpenAIAdapter
 
         config = ProviderConfig(api_key="test")
         adapter = OpenAIAdapter(config)
@@ -540,8 +540,8 @@ class TestStreamChunkBuilderStress:
 
     def test_many_small_chunks(self) -> None:
         """Test building from many small content chunks."""
-        from fastlitellm import stream_chunk_builder
-        from fastlitellm.types import ChunkChoice, ChunkDelta
+        from arcllm import stream_chunk_builder
+        from arcllm.types import ChunkChoice, ChunkDelta
 
         # Create 1000 small chunks
         chunks = []
@@ -570,8 +570,8 @@ class TestStreamChunkBuilderStress:
 
     def test_multiple_tool_calls_streaming(self) -> None:
         """Test building response with multiple parallel tool calls."""
-        from fastlitellm import stream_chunk_builder
-        from fastlitellm.types import ChunkChoice, ChunkDelta
+        from arcllm import stream_chunk_builder
+        from arcllm.types import ChunkChoice, ChunkDelta
 
         chunks = [
             # Initial role

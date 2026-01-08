@@ -1,6 +1,6 @@
-# Contributing to fastlitellm
+# Contributing to arcllm
 
-Thank you for your interest in contributing to fastlitellm! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to arcllm! This document provides guidelines and information for contributors.
 
 ## Code of Conduct
 
@@ -17,8 +17,8 @@ Please be respectful and constructive in all interactions. We welcome contributo
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/fastlitellm/fastlitellm.git
-   cd fastlitellm
+   git clone https://github.com/arcllm/arcllm.git
+   cd arcllm
    ```
 
 2. Install development dependencies:
@@ -33,9 +33,9 @@ Please be respectful and constructive in all interactions. We welcome contributo
 
 4. Run linting and type checks:
    ```bash
-   ruff check fastlitellm tests
-   ruff format --check fastlitellm tests
-   mypy fastlitellm --strict
+   ruff check arcllm tests
+   ruff format --check arcllm tests
+   mypy arcllm --strict
    ```
 
 ## Development Guidelines
@@ -55,7 +55,7 @@ Please be respectful and constructive in all interactions. We welcome contributo
 - Aim for >80% code coverage
 - Run the full test suite before submitting PRs:
   ```bash
-  pytest tests/ --ignore=tests/integration --cov=fastlitellm --cov-fail-under=80
+  pytest tests/ --ignore=tests/integration --cov=arcllm --cov-fail-under=80
   ```
 
 ### Adding a New Provider
@@ -86,10 +86,10 @@ Quick checklist:
 4. **Update documentation** if needed
 5. **Run all checks** locally:
    ```bash
-   ruff check fastlitellm tests
-   ruff format fastlitellm tests
-   mypy fastlitellm --strict
-   pytest tests/ --ignore=tests/integration --cov=fastlitellm
+   ruff check arcllm tests
+   ruff format arcllm tests
+   mypy arcllm --strict
+   pytest tests/ --ignore=tests/integration --cov=arcllm
    ```
 6. **Submit a pull request** with a clear description of your changes
 
@@ -114,7 +114,7 @@ Please include:
 
 When reporting bugs, please include:
 - Python version
-- fastlitellm version
+- arcllm version
 - Full error traceback
 - Minimal reproduction code
 - Expected vs actual behavior
@@ -137,4 +137,4 @@ For security vulnerabilities, please see [SECURITY.md](SECURITY.md).
 
 ## License
 
-By contributing to fastlitellm, you agree that your contributions will be licensed under the Apache License 2.0.
+By contributing to arcllm, you agree that your contributions will be licensed under the Apache License 2.0.

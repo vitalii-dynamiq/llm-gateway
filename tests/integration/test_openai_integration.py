@@ -23,7 +23,7 @@ class TestOpenAIIntegration(IntegrationTestBase):
 
     def test_structured_output_json_schema(self) -> None:
         """Test JSON schema structured output (OpenAI-specific)."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -63,7 +63,7 @@ class TestOpenAIIntegration(IntegrationTestBase):
 
     def test_streaming_with_usage(self) -> None:
         """Test streaming with include_usage option."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -82,7 +82,7 @@ class TestOpenAIIntegration(IntegrationTestBase):
 
     def test_multiple_tool_calls(self) -> None:
         """Test multiple tool calls in one response."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         tools = [
             {
@@ -123,7 +123,7 @@ class TestOpenAIIntegration(IntegrationTestBase):
 
     def test_embedding_multiple_inputs(self) -> None:
         """Test embedding with multiple inputs."""
-        from fastlitellm import embedding
+        from arcllm import embedding
 
         response = self.retry_on_rate_limit(
             embedding,

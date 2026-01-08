@@ -1,6 +1,6 @@
 # Release Checklist
 
-This document summarizes the release readiness status of fastlitellm v0.1.0.
+This document summarizes the release readiness status of arcllm v0.1.0.
 
 ## ✅ Typing
 
@@ -145,15 +145,15 @@ This document summarizes the release readiness status of fastlitellm v0.1.0.
 pip install -e ".[dev]"
 
 # Linting
-ruff check fastlitellm tests
-ruff format --check fastlitellm tests
+ruff check arcllm tests
+ruff format --check arcllm tests
 
 # Type checking
-mypy fastlitellm --strict
-pyright fastlitellm
+mypy arcllm --strict
+pyright arcllm
 
 # Unit tests with coverage
-pytest tests/ --ignore=tests/integration --cov=fastlitellm --cov-fail-under=80
+pytest tests/ --ignore=tests/integration --cov=arcllm --cov-fail-under=80
 
 # Build package
 python -m build

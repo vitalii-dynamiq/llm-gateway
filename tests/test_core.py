@@ -1,5 +1,5 @@
 """
-Tests for fastlitellm.core module.
+Tests for arcllm.core module.
 
 Tests the main API functions (completion, acompletion, embedding, aembedding)
 using mocked HTTP responses.
@@ -13,15 +13,15 @@ from unittest.mock import patch
 
 import pytest
 
-from fastlitellm.core import (
+from arcllm.core import (
     _build_provider_config,
     _get_adapter,
     completion,
     embedding,
     stream_chunk_builder,
 )
-from fastlitellm.http.client import HTTPResponse
-from fastlitellm.types import (
+from arcllm.http.client import HTTPResponse
+from arcllm.types import (
     ChunkChoice,
     ChunkDelta,
     StreamChunk,
@@ -149,7 +149,7 @@ class TestCompletion:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_http_client") as mock_client,
+            patch("arcllm.core._get_http_client") as mock_client,
         ):
             mock_client.return_value.request.return_value = mock_http_response
 
@@ -173,7 +173,7 @@ class TestCompletion:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_http_client") as mock_client,
+            patch("arcllm.core._get_http_client") as mock_client,
         ):
             mock_client.return_value.request.return_value = mock_http_response
 
@@ -209,7 +209,7 @@ class TestCompletion:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_http_client") as mock_client,
+            patch("arcllm.core._get_http_client") as mock_client,
         ):
             mock_client.return_value.request.return_value = mock_http_response
 
@@ -487,7 +487,7 @@ class TestEmbedding:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_http_client") as mock_client,
+            patch("arcllm.core._get_http_client") as mock_client,
         ):
             mock_client.return_value.request.return_value = mock_http_response
 
@@ -511,7 +511,7 @@ class TestEmbedding:
 
         with (
             patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}),
-            patch("fastlitellm.core._get_http_client") as mock_client,
+            patch("arcllm.core._get_http_client") as mock_client,
         ):
             mock_client.return_value.request.return_value = mock_http_response
 

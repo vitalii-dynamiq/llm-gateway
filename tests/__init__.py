@@ -1,1 +1,1 @@
-"""Tests for fastlitellm."""
+"""Tests for arcllm."""

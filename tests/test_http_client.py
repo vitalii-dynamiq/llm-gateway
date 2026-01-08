@@ -1,5 +1,5 @@
 """
-Tests for fastlitellm.http.client module.
+Tests for arcllm.http.client module.
 
 Tests the synchronous HTTP client with mocked network calls.
 """
@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from fastlitellm.http.client import ConnectionPool, HTTPClient, HTTPResponse
+from arcllm.http.client import ConnectionPool, HTTPClient, HTTPResponse
 
 
 class TestHTTPResponse:

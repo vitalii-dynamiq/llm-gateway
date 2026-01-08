@@ -1,10 +1,10 @@
 """
-Tests for fastlitellm.types module.
+Tests for arcllm.types module.
 """
 
 import pytest
 
-from fastlitellm.types import (
+from arcllm.types import (
     Choice,
     ChunkChoice,
     ChunkDelta,

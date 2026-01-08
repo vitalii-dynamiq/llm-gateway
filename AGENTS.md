@@ -1,10 +1,10 @@
 # AGENTS.md - Guide for AI Coding Agents
 
-This document provides guidelines for AI coding agents working on the fastlitellm codebase.
+This document provides guidelines for AI coding agents working on the arcllm codebase.
 
 ## Project Overview
 
-fastlitellm is a lightweight, high-performance Python library for calling LLM providers. It's designed to be:
+arcllm is a lightweight, high-performance Python library for calling LLM providers. It's designed to be:
 - API-compatible with LiteLLM SDK
 - Zero runtime dependencies (stdlib only)
 - Fast and efficient
@@ -34,14 +34,14 @@ import json
 import os
 from typing import Any
 
-from fastlitellm.types import ModelResponse
-from fastlitellm.exceptions import FastLiteLLMError
+from arcllm.types import ModelResponse
+from arcllm.exceptions import ArcLLMError
 ```
 
 ## Architecture
 
 ```
-fastlitellm/
+arcllm/
 ├── __init__.py          # Public API exports
 ├── types.py             # All dataclasses (ModelResponse, etc.)
 ├── exceptions.py        # Exception classes
@@ -86,7 +86,7 @@ tool_call.function.arguments = '{"json": "string"}'  # JSON STRING
 - Usage can be None if provider doesn't report it
 
 ### 4. Error Handling
-- Map all provider errors to fastlitellm exception classes
+- Map all provider errors to arcllm exception classes
 - Include provider name in all exceptions
 - Preserve request_id when available
 
@@ -100,17 +100,17 @@ pip install -e ".[dev]"
 pytest
 
 # Run with coverage
-pytest --cov=fastlitellm
+pytest --cov=arcllm
 
 # Run specific test file
 pytest tests/test_types.py
 
 # Run type checking
-mypy fastlitellm
+mypy arcllm
 
 # Run linting
-ruff check fastlitellm
-ruff format fastlitellm
+ruff check arcllm
+ruff format arcllm
 ```
 
 ## Adding/Updating Features
@@ -127,12 +127,12 @@ Quick checklist:
 6. Write tests in `tests/providers/`
 
 ### Updating Pricing
-1. Edit `fastlitellm/pricing/tables.py`
+1. Edit `arcllm/pricing/tables.py`
 2. Update `PRICING_VERSION` at top of file
 3. Run tests: `pytest tests/test_pricing.py`
 
 ### Updating Capabilities
-1. Edit `fastlitellm/capabilities/tables.py`
+1. Edit `arcllm/capabilities/tables.py`
 2. Update `CAPABILITIES_VERSION` at top of file
 3. Run tests: `pytest tests/test_capabilities.py`
 

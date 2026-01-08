@@ -2,7 +2,7 @@
 
 ## Overview
 
-fastlitellm supports Google's Gemini models via the Generative AI API.
+arcllm supports Google's Gemini models via the Generative AI API.
 
 ## API Documentation
 
@@ -12,13 +12,13 @@ fastlitellm supports Google's Gemini models via the Generative AI API.
 ## Configuration
 
 ```python
-import fastlitellm
+import arcllm
 
 # Via environment variable (recommended)
 # export GEMINI_API_KEY="..."
 # or export GOOGLE_API_KEY="..."
 
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gemini/gemini-1.5-flash",
     messages=[{"role": "user", "content": "Hello!"}]
 )
@@ -69,7 +69,7 @@ Gemini models support extremely long context:
 
 ### Basic Completion
 ```python
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gemini-1.5-flash",
     messages=[{"role": "user", "content": "Explain quantum computing"}]
 )
@@ -77,7 +77,7 @@ response = fastlitellm.completion(
 
 ### JSON Schema Output
 ```python
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gemini-1.5-flash",
     messages=[{"role": "user", "content": "Generate a product"}],
     response_format={
@@ -98,7 +98,7 @@ response = fastlitellm.completion(
 
 ### Streaming
 ```python
-stream = fastlitellm.completion(
+stream = arcllm.completion(
     model="gemini-1.5-flash",
     messages=[{"role": "user", "content": "Count to 10"}],
     stream=True
@@ -110,7 +110,7 @@ for chunk in stream:
 
 ### Embeddings
 ```python
-response = fastlitellm.embedding(
+response = arcllm.embedding(
     model="gemini/text-embedding-004",
     input=["Hello world"]
 )

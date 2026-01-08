@@ -22,7 +22,7 @@ class TestAnthropicIntegration(IntegrationTestBase):
 
     def test_system_prompt(self) -> None:
         """Test system prompt handling (Anthropic-specific)."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         response = self.retry_on_rate_limit(
             completion,
@@ -42,7 +42,7 @@ class TestAnthropicIntegration(IntegrationTestBase):
 
     def test_multimodal_message(self) -> None:
         """Test multimodal (vision) capability."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         # Small 1x1 red pixel PNG base64
         red_pixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
@@ -70,7 +70,7 @@ class TestAnthropicIntegration(IntegrationTestBase):
 
     def test_streaming_tool_calls(self) -> None:
         """Test streaming with tool calls."""
-        from fastlitellm import completion
+        from arcllm import completion
 
         tools = [
             {

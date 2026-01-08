@@ -1,10 +1,10 @@
 """
-Embeddings example for fastlitellm.
+Embeddings example for arcllm.
 
 This example demonstrates creating text embeddings.
 """
 
-import fastlitellm
+import arcllm
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
         "Python is a versatile programming language.",
     ]
 
-    response = fastlitellm.embedding(
+    response = arcllm.embedding(
         model="text-embedding-3-small",
         input=texts,
     )
@@ -41,7 +41,7 @@ def single_embedding():
     """Create a single embedding."""
     print("\n=== Single Embedding ===\n")
 
-    response = fastlitellm.embedding(
+    response = arcllm.embedding(
         model="text-embedding-3-small",
         input="Hello, world!",
     )
@@ -71,7 +71,7 @@ def similarity_example():
         "The weather is nice today",
     ]
 
-    response = fastlitellm.embedding(
+    response = arcllm.embedding(
         model="text-embedding-3-small",
         input=texts,
     )
@@ -89,7 +89,7 @@ async def async_embedding():
     """Async embedding example."""
     print("\n=== Async Embedding ===\n")
 
-    response = await fastlitellm.aembedding(
+    response = await arcllm.aembedding(
         model="text-embedding-3-small",
         input=["Async embeddings are cool!"],
     )
