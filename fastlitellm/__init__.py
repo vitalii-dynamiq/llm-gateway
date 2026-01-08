@@ -145,7 +145,7 @@ from fastlitellm.pricing import (
 )
 
 # Register all providers on first import
-from fastlitellm.providers.base import _register_all_providers
+from fastlitellm.providers.base import register_all_providers
 
 # Types
 from fastlitellm.types import (
@@ -164,4 +164,4 @@ from fastlitellm.types import (
     Usage,
 )
 
-_register_all_providers()
+register_all_providers()

@@ -126,7 +126,7 @@ class TestSSEParserEdgeCases:
         events.extend(parser.feed(ascii_prefix))
         # Feed UTF-8 content in 3-byte increments (complete characters)
         for i in range(0, len(utf8_content), 3):
-            chunk = utf8_content[i:i+3]
+            chunk = utf8_content[i : i + 3]
             events.extend(parser.feed(chunk))
         # Feed final newlines
         events.extend(parser.feed(b"\n\n"))
@@ -303,9 +303,7 @@ class TestOpenAIStreamingFormat:
                     }
                 ]
             ),
-            make_openai_stream_chunk(
-                tool_calls=[{"index": 0, "function": {"arguments": '{"loc'}}]
-            ),
+            make_openai_stream_chunk(tool_calls=[{"index": 0, "function": {"arguments": '{"loc'}}]),
             make_openai_stream_chunk(
                 tool_calls=[{"index": 0, "function": {"arguments": 'ation":'}}]
             ),
@@ -551,7 +549,9 @@ class TestStreamChunkBuilderStress:
             chunk = StreamChunk(
                 id="test",
                 model="gpt-4o-mini",
-                choices=[ChunkChoice(index=0, delta=ChunkDelta(content=f"{i}"), finish_reason=None)],
+                choices=[
+                    ChunkChoice(index=0, delta=ChunkDelta(content=f"{i}"), finish_reason=None)
+                ],
             )
             chunks.append(chunk)
 

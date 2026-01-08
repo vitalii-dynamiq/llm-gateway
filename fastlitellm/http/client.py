@@ -66,7 +66,7 @@ class ConnectionPool:
     port: int
     is_https: bool
     connections: list[http.client.HTTPConnection | http.client.HTTPSConnection] = field(
-        default_factory=list
+        default_factory=lambda: []
     )
     max_connections: int = 10
 

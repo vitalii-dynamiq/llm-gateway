@@ -35,6 +35,7 @@ __all__ = [
     "RequestData",
     "get_provider",
     "parse_model_string",
+    "register_all_providers",
     "register_provider",
 ]
 
@@ -85,7 +86,7 @@ class ProviderConfig:
     vertex_project: str | None = None
     vertex_location: str | None = None
     # Custom headers
-    extra_headers: dict[str, str] = field(default_factory=dict)
+    extra_headers: dict[str, str] = field(default_factory=lambda: {})
 
 
 @dataclass(slots=True)
@@ -437,7 +438,7 @@ def get_provider(name: str, config: ProviderConfig | None = None) -> Adapter:
 
 # Import provider modules to trigger registration
 # This is done at the bottom to avoid circular imports
-def _register_all_providers() -> None:
+def register_all_providers() -> None:
     """Register all provider adapters."""
     # Import each provider module - they self-register on import
     try:

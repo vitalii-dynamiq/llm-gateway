@@ -303,17 +303,79 @@ import fastlitellm as litellm
 response = litellm.completion(model="gpt-4o-mini", messages=messages)
 ```
 
+## Streaming with Usage
+
+```python
+# Get usage stats in streaming mode
+stream = fastlitellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    stream=True,
+    stream_options={"include_usage": True}
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")
+    if chunk.usage:
+        print(f"\nTokens: {chunk.usage.total_tokens}")
+```
+
+## Embeddings
+
+```python
+# Create embeddings for multiple texts
+response = fastlitellm.embedding(
+    model="text-embedding-3-small",
+    input=["Hello world", "Goodbye world"]
+)
+
+for i, emb in enumerate(response.data):
+    print(f"Text {i}: {len(emb.embedding)} dimensions")
+
+# Usage info
+print(f"Tokens used: {response.usage.prompt_tokens}")
+```
+
+## Cost Calculation
+
+```python
+import fastlitellm
+
+# Calculate cost from a response
+response = fastlitellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Write a haiku"}]
+)
+
+cost = fastlitellm.completion_cost(response)
+print(f"Total cost: ${cost:.6f}")
+
+# Or calculate manually
+prompt_cost, completion_cost = fastlitellm.cost_per_token(
+    model="gpt-4o-mini",
+    prompt_tokens=response.usage.prompt_tokens,
+    completion_tokens=response.usage.completion_tokens
+)
+print(f"Input: ${prompt_cost:.6f}, Output: ${completion_cost:.6f}")
+```
+
 ## Design Decisions
 
 1. **No Token Counting**: We use provider-reported usage only. No tiktoken dependency.
 2. **Stdlib Only**: Zero runtime dependencies for minimal footprint and security.
-3. **Python 3.13+**: Uses modern typing features for cleaner code.
+3. **Python 3.12+**: Uses modern typing features for cleaner code.
 4. **Explicit Over Magic**: Clear error messages, no silent parameter dropping by default.
 
 ## Contributing
 
-See [AGENTS.md](AGENTS.md) for development guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See [AGENTS.md](AGENTS.md) for AI agent development guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for security policy.
 
 ## License
 
-MIT License
+Apache License 2.0 - see [LICENSE](LICENSE)

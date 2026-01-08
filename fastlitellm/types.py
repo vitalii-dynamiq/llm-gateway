@@ -180,11 +180,11 @@ class ModelResponse:
     object: str = "chat.completion"
     created: int = 0
     model: str = ""
-    choices: list[Choice] = field(default_factory=list)
+    choices: list[Choice] = field(default_factory=lambda: [])
     usage: Usage | None = None
     system_fingerprint: str | None = None
     # Extra fields for debugging/compatibility
-    model_extra: dict[str, Any] = field(default_factory=dict)
+    model_extra: dict[str, Any] = field(default_factory=lambda: {})
 
     def __post_init__(self) -> None:
         """Ensure model_extra contains usage for compatibility."""
@@ -265,7 +265,7 @@ class StreamChunk:
     object: str = "chat.completion.chunk"
     created: int = 0
     model: str = ""
-    choices: list[ChunkChoice] = field(default_factory=list)
+    choices: list[ChunkChoice] = field(default_factory=lambda: [])
     usage: Usage | None = None  # Present in final chunk if include_usage=True
     system_fingerprint: str | None = None
 

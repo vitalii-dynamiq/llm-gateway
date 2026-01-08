@@ -46,11 +46,7 @@ class TestBuildRequest:
     def test_build_simple_request(self, adapter):
         """Test building a simple chat request."""
         messages = [{"role": "user", "content": "Hello"}]
-        request = adapter.build_request(
-            model="gpt-4o-mini",
-            messages=messages,
-            stream=False
-        )
+        request = adapter.build_request(model="gpt-4o-mini", messages=messages, stream=False)
 
         assert request.method == "POST"
         assert "chat/completions" in request.url
@@ -65,9 +61,7 @@ class TestBuildRequest:
     def test_build_request_with_temperature(self, adapter):
         """Test building request with temperature."""
         request = adapter.build_request(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": "Hi"}],
-            temperature=0.7
+            model="gpt-4o-mini", messages=[{"role": "user", "content": "Hi"}], temperature=0.7
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -76,9 +70,7 @@ class TestBuildRequest:
     def test_build_request_with_max_tokens(self, adapter):
         """Test building request with max_tokens."""
         request = adapter.build_request(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": "Hi"}],
-            max_tokens=100
+            model="gpt-4o-mini", messages=[{"role": "user", "content": "Hi"}], max_tokens=100
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -89,7 +81,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": "What's the weather?"}],
-            tools=tool_definition
+            tools=tool_definition,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -102,7 +94,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": "Give me JSON"}],
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -114,7 +106,7 @@ class TestBuildRequest:
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": "Hi"}],
             stream=True,
-            stream_options={"include_usage": True}
+            stream_options={"include_usage": True},
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -124,9 +116,7 @@ class TestBuildRequest:
     def test_build_request_o1_model(self, adapter):
         """Test building request for o1 model (uses max_completion_tokens)."""
         request = adapter.build_request(
-            model="o1-mini",
-            messages=[{"role": "user", "content": "Hi"}],
-            max_tokens=1000
+            model="o1-mini", messages=[{"role": "user", "content": "Hi"}], max_tokens=1000
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -198,7 +188,9 @@ class TestParseStreamEvent:
 
     def test_parse_content_chunk(self, adapter):
         """Test parsing content chunk."""
-        event_data = '{"id":"1","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}'
+        event_data = (
+            '{"id":"1","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}'
+        )
         chunk = adapter.parse_stream_event(event_data, "gpt-4o-mini")
 
         assert chunk is not None
@@ -207,7 +199,9 @@ class TestParseStreamEvent:
 
     def test_parse_role_chunk(self, adapter):
         """Test parsing role chunk (first chunk)."""
-        event_data = '{"id":"1","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}'
+        event_data = (
+            '{"id":"1","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}'
+        )
         chunk = adapter.parse_stream_event(event_data, "gpt-4o-mini")
 
         assert chunk is not None
@@ -233,7 +227,7 @@ class TestParseStreamEvent:
 
     def test_parse_tool_call_chunk(self, adapter):
         """Test parsing tool call in streaming."""
-        event_data = '''{"id":"1","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_123","type":"function","function":{"name":"get_weather","arguments":"{\\"loc"}}]},"finish_reason":null}]}'''
+        event_data = """{"id":"1","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_123","type":"function","function":{"name":"get_weather","arguments":"{\\"loc"}}]},"finish_reason":null}]}"""
         chunk = adapter.parse_stream_event(event_data, "gpt-4o-mini")
 
         assert chunk is not None
@@ -262,12 +256,9 @@ class TestParseError:
 
     def test_parse_401_error(self, adapter):
         """Test parsing 401 authentication error."""
-        error_data = json.dumps({
-            "error": {
-                "message": "Invalid API Key",
-                "type": "invalid_request_error"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"message": "Invalid API Key", "type": "invalid_request_error"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(401, error_data, "req-123")
         assert isinstance(error, AuthenticationError)
@@ -275,12 +266,9 @@ class TestParseError:
 
     def test_parse_429_error(self, adapter):
         """Test parsing 429 rate limit error."""
-        error_data = json.dumps({
-            "error": {
-                "message": "Rate limit exceeded",
-                "type": "rate_limit_error"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"message": "Rate limit exceeded", "type": "rate_limit_error"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(429, error_data, "req-123")
         assert isinstance(error, RateLimitError)
@@ -303,8 +291,7 @@ class TestEmbeddings:
     def test_build_embedding_request(self, adapter):
         """Test building embedding request."""
         request = adapter.build_embedding_request(
-            model="text-embedding-3-small",
-            input=["Hello", "World"]
+            model="text-embedding-3-small", input=["Hello", "World"]
         )
 
         assert request.method == "POST"

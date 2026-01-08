@@ -47,9 +47,7 @@ class TestBuildRequest:
         """Test building a simple chat request."""
         messages = [{"role": "user", "content": "Hello"}]
         request = adapter.build_request(
-            model="claude-3-5-sonnet-20241022",
-            messages=messages,
-            stream=False
+            model="claude-3-5-sonnet-20241022", messages=messages, stream=False
         )
 
         assert request.method == "POST"
@@ -86,7 +84,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="claude-3-5-sonnet-20241022",
             messages=[{"role": "user", "content": "Hi"}],
-            temperature=0.7
+            temperature=0.7,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -97,7 +95,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="claude-3-5-sonnet-20241022",
             messages=[{"role": "user", "content": "Hi"}],
-            max_tokens=100
+            max_tokens=100,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -108,7 +106,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="claude-3-5-sonnet-20241022",
             messages=[{"role": "user", "content": "What's the weather?"}],
-            tools=tool_definition
+            tools=tool_definition,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -123,7 +121,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="claude-3-5-sonnet-20241022",
             messages=[{"role": "user", "content": "Hi"}],
-            stream=True
+            stream=True,
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -134,7 +132,7 @@ class TestBuildRequest:
         request = adapter.build_request(
             model="claude-3-5-sonnet-20241022",
             messages=[{"role": "user", "content": "Hi"}],
-            stop=["END", "STOP"]
+            stop=["END", "STOP"],
         )
 
         body = json.loads(request.body.decode("utf-8"))
@@ -203,13 +201,10 @@ class TestMessageConversion:
                     {
                         "id": "call_123",
                         "type": "function",
-                        "function": {
-                            "name": "get_weather",
-                            "arguments": '{"location": "NYC"}'
-                        }
+                        "function": {"name": "get_weather", "arguments": '{"location": "NYC"}'},
                     }
-                ]
-            }
+                ],
+            },
         ]
 
         _, converted = adapter._convert_messages(messages)
@@ -231,15 +226,11 @@ class TestMessageConversion:
                     {
                         "id": "call_123",
                         "type": "function",
-                        "function": {"name": "get_weather", "arguments": "{}"}
+                        "function": {"name": "get_weather", "arguments": "{}"},
                     }
-                ]
+                ],
             },
-            {
-                "role": "tool",
-                "tool_call_id": "call_123",
-                "content": "Sunny, 72F"
-            }
+            {"role": "tool", "tool_call_id": "call_123", "content": "Sunny, 72F"},
         ]
 
         _, converted = adapter._convert_messages(messages)
@@ -265,15 +256,10 @@ class TestParseResponse:
             "id": "msg_123",
             "type": "message",
             "role": "assistant",
-            "content": [
-                {"type": "text", "text": "Hello! How can I help you?"}
-            ],
+            "content": [{"type": "text", "text": "Hello! How can I help you?"}],
             "model": "claude-3-5-sonnet-20241022",
             "stop_reason": "end_turn",
-            "usage": {
-                "input_tokens": 10,
-                "output_tokens": 8
-            }
+            "usage": {"input_tokens": 10, "output_tokens": 8},
         }
 
     def test_parse_simple_response(self, adapter, anthropic_response):
@@ -301,12 +287,12 @@ class TestParseResponse:
                     "type": "tool_use",
                     "id": "toolu_123",
                     "name": "get_weather",
-                    "input": {"location": "San Francisco"}
-                }
+                    "input": {"location": "San Francisco"},
+                },
             ],
             "model": "claude-3-5-sonnet-20241022",
             "stop_reason": "tool_use",
-            "usage": {"input_tokens": 50, "output_tokens": 30}
+            "usage": {"input_tokens": 50, "output_tokens": 30},
         }
 
         data = json.dumps(resp).encode("utf-8")
@@ -347,13 +333,12 @@ class TestParseStreamEvent:
 
     def test_parse_message_start(self, adapter):
         """Test parsing message_start event."""
-        event_data = json.dumps({
-            "type": "message_start",
-            "message": {
-                "id": "msg_123",
-                "model": "claude-3-5-sonnet-20241022"
+        event_data = json.dumps(
+            {
+                "type": "message_start",
+                "message": {"id": "msg_123", "model": "claude-3-5-sonnet-20241022"},
             }
-        })
+        )
         chunk = adapter.parse_stream_event(event_data, "claude-3-5-sonnet-20241022")
 
         assert chunk is not None
@@ -362,11 +347,13 @@ class TestParseStreamEvent:
 
     def test_parse_content_block_delta(self, adapter):
         """Test parsing content_block_delta event."""
-        event_data = json.dumps({
-            "type": "content_block_delta",
-            "index": 0,
-            "delta": {"type": "text_delta", "text": "Hello"}
-        })
+        event_data = json.dumps(
+            {
+                "type": "content_block_delta",
+                "index": 0,
+                "delta": {"type": "text_delta", "text": "Hello"},
+            }
+        )
         chunk = adapter.parse_stream_event(event_data, "claude-3-5-sonnet-20241022")
 
         assert chunk is not None
@@ -374,11 +361,13 @@ class TestParseStreamEvent:
 
     def test_parse_message_delta(self, adapter):
         """Test parsing message_delta event (with stop reason)."""
-        event_data = json.dumps({
-            "type": "message_delta",
-            "delta": {"stop_reason": "end_turn"},
-            "usage": {"output_tokens": 10}
-        })
+        event_data = json.dumps(
+            {
+                "type": "message_delta",
+                "delta": {"stop_reason": "end_turn"},
+                "usage": {"output_tokens": 10},
+            }
+        )
         chunk = adapter.parse_stream_event(event_data, "claude-3-5-sonnet-20241022")
 
         assert chunk is not None
@@ -406,12 +395,9 @@ class TestParseError:
 
     def test_parse_401_error(self, adapter):
         """Test parsing 401 authentication error."""
-        error_data = json.dumps({
-            "error": {
-                "type": "authentication_error",
-                "message": "Invalid API Key"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"type": "authentication_error", "message": "Invalid API Key"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(401, error_data, "req-123")
         assert isinstance(error, AuthenticationError)
@@ -419,12 +405,9 @@ class TestParseError:
 
     def test_parse_429_error(self, adapter):
         """Test parsing 429 rate limit error."""
-        error_data = json.dumps({
-            "error": {
-                "type": "rate_limit_error",
-                "message": "Rate limit exceeded"
-            }
-        }).encode("utf-8")
+        error_data = json.dumps(
+            {"error": {"type": "rate_limit_error", "message": "Rate limit exceeded"}}
+        ).encode("utf-8")
 
         error = adapter.parse_error(429, error_data, "req-123")
         assert isinstance(error, RateLimitError)
