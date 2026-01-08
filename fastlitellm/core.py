@@ -10,7 +10,7 @@ This module provides the main entry points:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 from fastlitellm.http.async_client import AsyncHTTPClient, AsyncHTTPResponse
 from fastlitellm.http.client import HTTPClient, HTTPResponse
@@ -113,7 +113,7 @@ def completion(
     *,
     model: str,
     messages: list[dict[str, Any]],
-    stream: bool = False,
+    stream: Literal[False] = ...,
     **kwargs: Any,
 ) -> ModelResponse: ...
 
@@ -123,7 +123,7 @@ def completion(
     *,
     model: str,
     messages: list[dict[str, Any]],
-    stream: bool = True,
+    stream: Literal[True],
     **kwargs: Any,
 ) -> StreamingResponse: ...
 

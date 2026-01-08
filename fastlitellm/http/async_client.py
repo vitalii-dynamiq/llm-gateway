@@ -128,11 +128,11 @@ class AsyncHTTPClient:
     ) -> tuple[int, dict[str, str]]:
         """Read and parse HTTP response headers."""
         # Read status line
-        status_line = await reader.readline()
-        if not status_line:
+        status_line_bytes = await reader.readline()
+        if not status_line_bytes:
             raise ConnectionError("Empty response from server")
 
-        status_line = status_line.decode("utf-8", errors="replace").strip()
+        status_line = status_line_bytes.decode("utf-8", errors="replace").strip()
         parts = status_line.split(" ", 2)
         if len(parts) < 2:
             raise ConnectionError(f"Invalid status line: {status_line}")
@@ -141,10 +141,10 @@ class AsyncHTTPClient:
         # Read headers
         headers: dict[str, str] = {}
         while True:
-            line = await reader.readline()
-            if not line or line == b"\r\n" or line == b"\n":
+            line_bytes = await reader.readline()
+            if not line_bytes or line_bytes == b"\r\n" or line_bytes == b"\n":
                 break
-            line = line.decode("utf-8", errors="replace").strip()
+            line = line_bytes.decode("utf-8", errors="replace").strip()
             if ":" in line:
                 key, value = line.split(":", 1)
                 headers[key.strip().lower()] = value.strip()
@@ -251,6 +251,9 @@ class AsyncHTTPClient:
                     asyncio.open_connection(host, port, ssl=ssl_ctx),
                     timeout=self._connect_timeout,
                 )
+                # Assertions for type narrowing - these are guaranteed after successful open_connection
+                assert reader is not None
+                assert writer is not None
 
                 # Send request
                 request_bytes = self._build_request(method, host, path, request_headers, body)
