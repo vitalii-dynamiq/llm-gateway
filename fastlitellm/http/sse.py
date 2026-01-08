@@ -5,12 +5,16 @@ Handles:
 - Standard SSE format (data:, event:, id:, retry:)
 - Partial chunks and multi-byte UTF-8 boundaries
 - OpenAI-style streaming format
+
+Performance optimizations:
+- Pre-compiled constants to avoid repeated string creation
+- Minimized allocations in hot paths
+- Direct string operations instead of method calls where possible
 """
 
 from __future__ import annotations
 
 import contextlib
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,20 +22,49 @@ if TYPE_CHECKING:
 
 __all__ = ["AsyncSSEParser", "SSEEvent", "SSEParser"]
 
+# Pre-defined constants for hot path optimization
+_NEWLINE = "\n"
+_CARRIAGE_RETURN = "\r"
+_COLON = ":"
+_SPACE = " "
+_DONE_MARKER = "[DONE]"
+_DEFAULT_EVENT = "message"
+_FIELD_DATA = "data"
+_FIELD_EVENT = "event"
+_FIELD_ID = "id"
+_FIELD_RETRY = "retry"
 
-@dataclass(slots=True)
+
 class SSEEvent:
-    """A single Server-Sent Event."""
+    """
+    A single Server-Sent Event.
 
-    data: str
-    event: str = "message"
-    id: str | None = None
-    retry: int | None = None
+    Uses __slots__ for memory efficiency and faster attribute access.
+    """
+
+    __slots__ = ("_is_done", "data", "event", "id", "retry")
+
+    def __init__(
+        self,
+        data: str,
+        event: str = _DEFAULT_EVENT,
+        id: str | None = None,
+        retry: int | None = None,
+    ) -> None:
+        self.data = data
+        self.event = event
+        self.id = id
+        self.retry = retry
+        # Cache is_done check since data is immutable
+        self._is_done: bool | None = None
 
     @property
     def is_done(self) -> bool:
         """Check if this is the [DONE] terminator event."""
-        return self.data.strip() == "[DONE]"
+        if self._is_done is None:
+            # Strip and compare - cache the result
+            self._is_done = self.data.strip() == _DONE_MARKER
+        return self._is_done
 
 
 class SSEParser:
@@ -39,13 +72,18 @@ class SSEParser:
     Parser for Server-Sent Events stream.
 
     Handles partial chunks and maintains state across calls.
+
+    Performance notes:
+    - Uses list for _current_data to avoid repeated string concatenation
+    - Minimizes allocations in the hot parsing path
+    - Uses string partition() which is faster than split() for single splits
     """
 
     __slots__ = ("_buffer", "_current_data", "_current_event", "_current_id", "_current_retry")
 
     def __init__(self) -> None:
         self._buffer = ""
-        self._current_event = "message"
+        self._current_event = _DEFAULT_EVENT
         self._current_data: list[str] = []
         self._current_id: str | None = None
         self._current_retry: int | None = None
@@ -60,61 +98,81 @@ class SSEParser:
         Yields:
             SSEEvent for each complete event in the chunk
         """
+        # Fast path: decode bytes if needed
         if isinstance(chunk, bytes):
-            # Handle potential UTF-8 boundary issues
             chunk = chunk.decode("utf-8", errors="replace")
 
+        # Append to buffer
         self._buffer += chunk
 
-        # Process complete lines
-        while "\n" in self._buffer:
-            line, self._buffer = self._buffer.split("\n", 1)
-            line = line.rstrip("\r")
+        # Process complete lines - use find() for speed
+        buffer = self._buffer
+        newline_pos = buffer.find(_NEWLINE)
 
+        while newline_pos != -1:
+            # Extract line (strip \r if present)
+            line = buffer[:newline_pos]
+            if line.endswith(_CARRIAGE_RETURN):
+                line = line[:-1]
+
+            # Advance buffer
+            buffer = buffer[newline_pos + 1 :]
+
+            # Process the line
             event = self._process_line(line)
             if event is not None:
                 yield event
 
+            # Find next newline
+            newline_pos = buffer.find(_NEWLINE)
+
+        # Store remaining buffer
+        self._buffer = buffer
+
     def _process_line(self, line: str) -> SSEEvent | None:
         """Process a single line and return event if complete."""
+        # Empty line = dispatch event
         if not line:
-            # Empty line = dispatch event
             if self._current_data:
+                # Join data lines and create event
                 event = SSEEvent(
-                    data="\n".join(self._current_data),
+                    data=_NEWLINE.join(self._current_data),
                     event=self._current_event,
                     id=self._current_id,
                     retry=self._current_retry,
                 )
-                # Reset for next event
+                # Reset for next event - reuse list
                 self._current_data = []
-                self._current_event = "message"
+                self._current_event = _DEFAULT_EVENT
                 self._current_id = None
                 self._current_retry = None
                 return event
             return None
 
-        # Comment line
-        if line.startswith(":"):
+        # Comment line - fast check
+        if line[0] == _COLON:
             return None
 
-        # Parse field
-        if ":" in line:
-            field, _, value = line.partition(":")
+        # Parse field using partition (faster than split for single delimiter)
+        colon_pos = line.find(_COLON)
+        if colon_pos != -1:
+            field = line[:colon_pos]
+            value = line[colon_pos + 1 :]
             # Remove single leading space if present
-            if value.startswith(" "):
+            if value and value[0] == _SPACE:
                 value = value[1:]
         else:
             field = line
             value = ""
 
-        if field == "data":
+        # Field dispatch - ordered by frequency in typical SSE streams
+        if field == _FIELD_DATA:
             self._current_data.append(value)
-        elif field == "event":
+        elif field == _FIELD_EVENT:
             self._current_event = value
-        elif field == "id":
+        elif field == _FIELD_ID:
             self._current_id = value
-        elif field == "retry":
+        elif field == _FIELD_RETRY:
             with contextlib.suppress(ValueError):
                 self._current_retry = int(value)
 
@@ -124,18 +182,21 @@ class SSEParser:
         """Flush any remaining buffered event."""
         # First, process any remaining buffer content
         if self._buffer:
-            self._process_line(self._buffer.rstrip("\r"))
+            line = self._buffer
+            if line.endswith(_CARRIAGE_RETURN):
+                line = line[:-1]
+            self._process_line(line)
             self._buffer = ""
 
         if self._current_data:
             event = SSEEvent(
-                data="\n".join(self._current_data),
+                data=_NEWLINE.join(self._current_data),
                 event=self._current_event,
                 id=self._current_id,
                 retry=self._current_retry,
             )
             self._current_data = []
-            self._current_event = "message"
+            self._current_event = _DEFAULT_EVENT
             self._current_id = None
             self._current_retry = None
             return event

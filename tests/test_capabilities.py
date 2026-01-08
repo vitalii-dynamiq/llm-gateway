@@ -5,14 +5,14 @@ Tests for fastlitellm.capabilities module.
 import pytest
 
 from fastlitellm.capabilities import (
-    get_max_tokens,
-    supports_vision,
-    supports_pdf_input,
-    supports_tools,
-    supports_structured_output,
-    get_model_capabilities,
-    ModelCapabilities,
     CAPABILITIES_VERSION,
+    ModelCapabilities,
+    get_max_tokens,
+    get_model_capabilities,
+    supports_pdf_input,
+    supports_structured_output,
+    supports_tools,
+    supports_vision,
 )
 
 

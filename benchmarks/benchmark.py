@@ -10,8 +10,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Fixtures for mocked responses
 MOCK_COMPLETION_RESPONSE = {
@@ -62,9 +61,9 @@ def benchmark_import_time():
 def benchmark_type_creation(iterations: int = 10000):
     """Benchmark creating response types."""
     from fastlitellm.types import (
-        ModelResponse,
         Choice,
         Message,
+        ModelResponse,
         Usage,
     )
 
@@ -73,7 +72,7 @@ def benchmark_type_creation(iterations: int = 10000):
         msg = Message(role="assistant", content="Hello world")
         choice = Choice(index=0, message=msg, finish_reason="stop")
         usage = Usage(prompt_tokens=10, completion_tokens=20, total_tokens=30)
-        response = ModelResponse(
+        ModelResponse(
             id="test-123",
             model="gpt-4o-mini",
             choices=[choice],
@@ -87,8 +86,8 @@ def benchmark_type_creation(iterations: int = 10000):
 
 def benchmark_response_parsing(iterations: int = 10000):
     """Benchmark parsing JSON response."""
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
     from fastlitellm.providers.base import ProviderConfig
+    from fastlitellm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -113,7 +112,7 @@ def benchmark_sse_parsing(iterations: int = 10000):
     start = time.perf_counter()
     for _ in range(iterations):
         parser = SSEParser()
-        events = list(parser.feed(chunk_data))
+        list(parser.feed(chunk_data))
     elapsed = time.perf_counter() - start
 
     print(f"SSE parsing ({iterations} iterations): {elapsed*1000:.2f}ms ({elapsed/iterations*1000000:.2f}µs/iter)")
@@ -122,8 +121,8 @@ def benchmark_sse_parsing(iterations: int = 10000):
 
 def benchmark_request_building(iterations: int = 10000):
     """Benchmark building requests."""
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
     from fastlitellm.providers.base import ProviderConfig
+    from fastlitellm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -216,8 +215,8 @@ def benchmark_full_completion_mocked(iterations: int = 1000):
 def benchmark_stream_chunk_builder(iterations: int = 1000):
     """Benchmark stream_chunk_builder."""
     from fastlitellm import stream_chunk_builder
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
     from fastlitellm.providers.base import ProviderConfig
+    from fastlitellm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)

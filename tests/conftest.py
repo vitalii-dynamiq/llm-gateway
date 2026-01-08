@@ -2,10 +2,10 @@
 Pytest configuration and shared fixtures for fastlitellm tests.
 """
 
-import pytest
 import json
 from typing import Any
 
+import pytest
 
 # =============================================================================
 # OpenAI Response Fixtures

@@ -2,20 +2,18 @@
 Tests for fastlitellm.exceptions module.
 """
 
-import pytest
 
 from fastlitellm.exceptions import (
-    FastLiteLLMError,
     AuthenticationError,
-    RateLimitError,
-    TimeoutError,
+    ContentFilterError,
+    FastLiteLLMError,
+    InvalidRequestError,
     ProviderAPIError,
+    RateLimitError,
+    ResponseParseError,
+    TimeoutError,
     UnsupportedModelError,
     UnsupportedParameterError,
-    ResponseParseError,
-    ContentFilterError,
-    InvalidRequestError,
-    ConnectionError,
     map_status_code_to_exception,
 )
 

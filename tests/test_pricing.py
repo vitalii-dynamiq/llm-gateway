@@ -5,14 +5,14 @@ Tests for fastlitellm.pricing module.
 import pytest
 
 from fastlitellm.pricing import (
-    cost_per_token,
-    completion_cost,
-    get_model_pricing,
-    ModelPricing,
     PRICING_VERSION,
+    ModelPricing,
+    completion_cost,
+    cost_per_token,
+    get_model_pricing,
 )
 from fastlitellm.pricing.tables import UnknownModelPricingError
-from fastlitellm.types import ModelResponse, Choice, Message, Usage
+from fastlitellm.types import Choice, Message, ModelResponse, Usage
 
 
 class TestGetModelPricing:

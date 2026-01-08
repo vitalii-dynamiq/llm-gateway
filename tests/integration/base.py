@@ -133,9 +133,12 @@ class IntegrationTestBase:
 
         for chunk in response:
             chunks.append(chunk)
-            if chunk.choices and chunk.choices[0].delta:
-                if chunk.choices[0].delta.content:
-                    content_parts.append(chunk.choices[0].delta.content)
+            if (
+                chunk.choices
+                and chunk.choices[0].delta
+                and chunk.choices[0].delta.content
+            ):
+                content_parts.append(chunk.choices[0].delta.content)
 
         assert len(chunks) > 0, "Expected at least one chunk"
         assert len(content_parts) > 0, "Expected some content deltas"

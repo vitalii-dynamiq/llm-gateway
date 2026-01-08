@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import json
 import os
-import re
-from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any
-from unittest.mock import MagicMock, patch
+from typing import TYPE_CHECKING, Any
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass

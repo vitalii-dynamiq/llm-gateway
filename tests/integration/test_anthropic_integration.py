@@ -6,8 +6,6 @@ Required environment variable: ANTHROPIC_API_KEY
 
 from __future__ import annotations
 
-import pytest
-
 from tests.integration.base import IntegrationTestBase
 
 

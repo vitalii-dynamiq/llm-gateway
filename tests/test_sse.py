@@ -2,9 +2,8 @@
 Tests for fastlitellm.http.sse module.
 """
 
-import pytest
 
-from fastlitellm.http.sse import SSEParser, SSEEvent, parse_sse_stream
+from fastlitellm.http.sse import SSEEvent, SSEParser, parse_sse_stream
 
 
 class TestSSEEvent:

@@ -539,6 +539,12 @@ def stream_chunk_builder(
     This helper accumulates content and tool calls from streaming chunks
     into a final response object, similar to LiteLLM's stream_chunk_builder.
 
+    Performance optimizations:
+    - Pre-allocates lists where size is known
+    - Uses list.append() instead of string concatenation
+    - Minimizes dict lookups with local variable caching
+    - Avoids repeated attribute access in tight loops
+
     Args:
         chunks: List of StreamChunk objects from streaming
         messages: Original messages (optional, for context)
@@ -549,7 +555,7 @@ def stream_chunk_builder(
     if not chunks:
         raise ValueError("No chunks provided to stream_chunk_builder")
 
-    # Get metadata from first chunk
+    # Get metadata from first chunk - cache for speed
     first_chunk = chunks[0]
     response_id = first_chunk.id
     model = first_chunk.model
@@ -557,90 +563,106 @@ def stream_chunk_builder(
     system_fingerprint = first_chunk.system_fingerprint
 
     # Track content and tool calls per choice index
-    choice_data: dict[int, dict[str, Any]] = {}
+    # Use specialized structure for better performance
+    choice_roles: dict[int, str | None] = {}
+    choice_content: dict[int, list[str]] = {}
+    choice_tool_calls: dict[int, dict[int, list[Any]]] = {}  # idx -> tc_idx -> [id, type, name_parts, arg_parts]
+    choice_finish: dict[int, str | None] = {}
+    choice_logprobs: dict[int, dict[str, Any] | None] = {}
 
     # Last usage (if present in any chunk)
     last_usage: Usage | None = None
 
+    # Single pass through chunks
     for chunk in chunks:
-        if chunk.usage is not None:
-            last_usage = chunk.usage
+        chunk_usage = chunk.usage
+        if chunk_usage is not None:
+            last_usage = chunk_usage
 
         for choice in chunk.choices:
             idx = choice.index
-            if idx not in choice_data:
-                choice_data[idx] = {
-                    "role": None,
-                    "content_parts": [],
-                    "tool_calls": {},  # id -> {id, type, function: {name, arguments}}
-                    "finish_reason": None,
-                    "logprobs": None,
-                }
+            delta = choice.delta
 
-            data = choice_data[idx]
+            # Initialize on first encounter
+            if idx not in choice_content:
+                choice_roles[idx] = None
+                choice_content[idx] = []
+                choice_tool_calls[idx] = {}
+                choice_finish[idx] = None
+                choice_logprobs[idx] = None
 
-            # Accumulate delta
-            if choice.delta.role:
-                data["role"] = choice.delta.role
+            # Accumulate delta - direct attribute access
+            delta_role = delta.role
+            if delta_role:
+                choice_roles[idx] = delta_role
 
-            if choice.delta.content:
-                data["content_parts"].append(choice.delta.content)
+            delta_content = delta.content
+            if delta_content:
+                choice_content[idx].append(delta_content)
 
-            if choice.finish_reason:
-                data["finish_reason"] = choice.finish_reason
+            choice_finish_reason = choice.finish_reason
+            if choice_finish_reason:
+                choice_finish[idx] = choice_finish_reason
 
-            if choice.logprobs:
-                data["logprobs"] = choice.logprobs
+            choice_lp = choice.logprobs
+            if choice_lp:
+                choice_logprobs[idx] = choice_lp
 
             # Accumulate tool calls
-            if choice.delta.tool_calls:
-                for tc_delta in choice.delta.tool_calls:
+            delta_tool_calls = delta.tool_calls
+            if delta_tool_calls:
+                tc_dict = choice_tool_calls[idx]
+                for tc_delta in delta_tool_calls:
                     tc_index = tc_delta.get("index", 0)
-                    if tc_index not in data["tool_calls"]:
-                        data["tool_calls"][tc_index] = {
-                            "id": "",
-                            "type": "function",
-                            "function": {"name": "", "arguments": ""},
-                        }
+                    if tc_index not in tc_dict:
+                        # [id, type, name_parts, arg_parts]
+                        tc_dict[tc_index] = ["", "function", [], []]
 
-                    tc = data["tool_calls"][tc_index]
-                    if "id" in tc_delta:
-                        tc["id"] = tc_delta["id"]
-                    if "type" in tc_delta:
-                        tc["type"] = tc_delta["type"]
-                    if "function" in tc_delta:
-                        func = tc_delta["function"]
-                        if "name" in func:
-                            tc["function"]["name"] += func["name"]
-                        if "arguments" in func:
-                            tc["function"]["arguments"] += func["arguments"]
+                    tc = tc_dict[tc_index]
+                    tc_id = tc_delta.get("id")
+                    if tc_id:
+                        tc[0] = tc_id
+                    tc_type = tc_delta.get("type")
+                    if tc_type:
+                        tc[1] = tc_type
+                    tc_func = tc_delta.get("function")
+                    if tc_func:
+                        func_name = tc_func.get("name")
+                        if func_name:
+                            tc[2].append(func_name)
+                        func_args = tc_func.get("arguments")
+                        if func_args:
+                            tc[3].append(func_args)
 
-    # Build choices
+    # Build choices - pre-sort keys once
+    sorted_indices = sorted(choice_content.keys())
     choices: list[Choice] = []
-    for idx in sorted(choice_data.keys()):
-        data = choice_data[idx]
 
-        # Build tool calls
+    for idx in sorted_indices:
+        # Build tool calls if present
         tool_calls: list[ToolCall] | None = None
-        if data["tool_calls"]:
+        tc_dict = choice_tool_calls[idx]
+        if tc_dict:
             tool_calls = []
-            for tc_idx in sorted(data["tool_calls"].keys()):
-                tc_data = data["tool_calls"][tc_idx]
+            for tc_idx in sorted(tc_dict.keys()):
+                tc = tc_dict[tc_idx]
                 tool_calls.append(
                     ToolCall(
-                        id=tc_data["id"],
-                        type=tc_data["type"],
+                        id=tc[0],
+                        type=tc[1],
                         function=FunctionCall(
-                            name=tc_data["function"]["name"],
-                            arguments=tc_data["function"]["arguments"],
+                            name="".join(tc[2]),
+                            arguments="".join(tc[3]),
                         ),
                     )
                 )
 
-        content = "".join(data["content_parts"]) if data["content_parts"] else None
+        # Join content parts efficiently
+        content_parts = choice_content[idx]
+        content = "".join(content_parts) if content_parts else None
 
         message = Message(
-            role=data["role"] or "assistant",
+            role=choice_roles[idx] or "assistant",
             content=content,
             tool_calls=tool_calls if tool_calls else None,
         )
@@ -649,8 +671,8 @@ def stream_chunk_builder(
             Choice(
                 index=idx,
                 message=message,
-                finish_reason=data["finish_reason"],
-                logprobs=data["logprobs"],
+                finish_reason=choice_finish[idx],
+                logprobs=choice_logprobs[idx],
             )
         )
 

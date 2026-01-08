@@ -2,18 +2,19 @@
 Tests for OpenAI provider adapter.
 """
 
-import pytest
 import json
 import os
 from unittest.mock import patch
 
-from fastlitellm.providers.openai_adapter import OpenAIAdapter
-from fastlitellm.providers.base import ProviderConfig
+import pytest
+
 from fastlitellm.exceptions import (
     AuthenticationError,
     RateLimitError,
     ResponseParseError,
 )
+from fastlitellm.providers.base import ProviderConfig
+from fastlitellm.providers.openai_adapter import OpenAIAdapter
 
 
 class TestOpenAIAdapter:

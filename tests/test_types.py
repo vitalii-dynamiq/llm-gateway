@@ -2,23 +2,22 @@
 Tests for fastlitellm.types module.
 """
 
+
 import pytest
-import json
 
 from fastlitellm.types import (
-    ModelResponse,
     Choice,
-    Message,
-    ToolCall,
-    FunctionCall,
-    Usage,
-    StreamChunk,
     ChunkChoice,
     ChunkDelta,
-    EmbeddingResponse,
     EmbeddingData,
+    EmbeddingResponse,
     EmbeddingUsage,
-    StreamingResponse,
+    FunctionCall,
+    Message,
+    ModelResponse,
+    StreamChunk,
+    ToolCall,
+    Usage,
 )
 
 
