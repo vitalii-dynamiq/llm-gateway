@@ -1,0 +1,579 @@
+"""
+Anthropic Claude adapter for fastlitellm.
+
+Anthropic uses a different API format than OpenAI:
+- Messages endpoint at /v1/messages
+- Different message format (system separate from messages)
+- Different tool calling format
+- Different streaming format (SSE with different event types)
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from typing import Any
+
+from fastlitellm.exceptions import (
+    AuthenticationError,
+    FastLiteLLMError,
+    InvalidRequestError,
+    ProviderAPIError,
+    RateLimitError,
+    ResponseParseError,
+    UnsupportedModelError,
+)
+from fastlitellm.providers.base import (
+    COMMON_PARAMS,
+    BaseAdapter,
+    ProviderConfig,
+    RequestData,
+    register_provider,
+)
+from fastlitellm.types import (
+    Choice,
+    ChunkChoice,
+    ChunkDelta,
+    EmbeddingResponse,
+    FunctionCall,
+    Message,
+    ModelResponse,
+    StreamChunk,
+    ToolCall,
+    Usage,
+)
+
+__all__ = ["AnthropicAdapter"]
+
+
+class AnthropicAdapter(BaseAdapter):
+    """Adapter for Anthropic Claude API."""
+
+    provider_name = "anthropic"
+
+    # Anthropic-specific supported params
+    supported_params = COMMON_PARAMS | {
+        "system",  # System prompt (separate in Anthropic)
+        "metadata",
+        "stop_sequences",  # Anthropic calls it stop_sequences
+    }
+
+    def __init__(self, config: ProviderConfig) -> None:
+        super().__init__(config)
+        self._api_base = config.api_base or "https://api.anthropic.com"
+        self._api_version = config.api_version or "2023-06-01"
+
+    def _get_headers(self) -> dict[str, str]:
+        """Get request headers."""
+        api_key = self._get_api_key("ANTHROPIC_API_KEY")
+        headers = {
+            "x-api-key": api_key,
+            "Content-Type": "application/json",
+            "anthropic-version": self._api_version,
+        }
+        # Enable beta features like prompt caching
+        headers["anthropic-beta"] = "prompt-caching-2024-07-31"
+
+        if self.config.extra_headers:
+            headers.update(self.config.extra_headers)
+        return headers
+
+    def _convert_messages(
+        self, messages: list[dict[str, Any]]
+    ) -> tuple[str | None, list[dict[str, Any]]]:
+        """
+        Convert OpenAI-style messages to Anthropic format.
+
+        Returns:
+            Tuple of (system_prompt, anthropic_messages)
+        """
+        system_prompt: str | None = None
+        anthropic_messages: list[dict[str, Any]] = []
+
+        for msg in messages:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+
+            if role == "system":
+                # Anthropic takes system as a separate parameter
+                if system_prompt:
+                    system_prompt += "\n\n" + content
+                else:
+                    system_prompt = content
+            elif role == "user":
+                # Handle potential multimodal content
+                if isinstance(content, list):
+                    anthropic_content = self._convert_multimodal_content(content)
+                    anthropic_messages.append({"role": "user", "content": anthropic_content})
+                else:
+                    anthropic_messages.append({"role": "user", "content": content})
+            elif role == "assistant":
+                # Check for tool use in assistant messages
+                if msg.get("tool_calls"):
+                    # Convert tool calls to Anthropic format
+                    content_blocks: list[dict[str, Any]] = []
+                    if content:
+                        content_blocks.append({"type": "text", "text": content})
+                    for tc in msg["tool_calls"]:
+                        func = tc.get("function", {})
+                        tool_use = {
+                            "type": "tool_use",
+                            "id": tc.get("id", ""),
+                            "name": func.get("name", ""),
+                            "input": json.loads(func.get("arguments", "{}")),
+                        }
+                        content_blocks.append(tool_use)
+                    anthropic_messages.append({"role": "assistant", "content": content_blocks})
+                else:
+                    anthropic_messages.append({"role": "assistant", "content": content or ""})
+            elif role == "tool":
+                # Tool result message
+                tool_result = {
+                    "type": "tool_result",
+                    "tool_use_id": msg.get("tool_call_id", ""),
+                    "content": content,
+                }
+                # Anthropic requires tool results in a user message
+                if anthropic_messages and anthropic_messages[-1]["role"] == "user":
+                    # Append to existing user message
+                    existing = anthropic_messages[-1]["content"]
+                    if isinstance(existing, list):
+                        existing.append(tool_result)
+                    else:
+                        anthropic_messages[-1]["content"] = [
+                            {"type": "text", "text": existing},
+                            tool_result,
+                        ]
+                else:
+                    anthropic_messages.append({"role": "user", "content": [tool_result]})
+
+        return system_prompt, anthropic_messages
+
+    def _convert_multimodal_content(self, content: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert OpenAI multimodal content to Anthropic format."""
+        anthropic_content: list[dict[str, Any]] = []
+
+        for part in content:
+            if part.get("type") == "text":
+                anthropic_content.append({"type": "text", "text": part.get("text", "")})
+            elif part.get("type") == "image_url":
+                image_url = part.get("image_url", {})
+                url = image_url.get("url", "")
+
+                if url.startswith("data:"):
+                    # Base64 encoded image
+                    # Format: data:image/jpeg;base64,....
+                    header, data = url.split(",", 1)
+                    media_type = header.split(";")[0].split(":")[1]
+                    anthropic_content.append(
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": media_type,
+                                "data": data,
+                            },
+                        }
+                    )
+                else:
+                    # URL-based image
+                    anthropic_content.append(
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "url",
+                                "url": url,
+                            },
+                        }
+                    )
+
+        return anthropic_content
+
+    def _convert_tools(self, tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert OpenAI tool format to Anthropic format."""
+        anthropic_tools: list[dict[str, Any]] = []
+
+        for tool in tools:
+            if tool.get("type") == "function":
+                func = tool.get("function", {})
+                anthropic_tools.append(
+                    {
+                        "name": func.get("name", ""),
+                        "description": func.get("description", ""),
+                        "input_schema": func.get(
+                            "parameters", {"type": "object", "properties": {}}
+                        ),
+                    }
+                )
+
+        return anthropic_tools
+
+    def build_request(
+        self,
+        *,
+        model: str,
+        messages: list[dict[str, Any]],
+        stream: bool = False,
+        drop_params: bool = False,
+        **kwargs: Any,
+    ) -> RequestData:
+        """Build Anthropic messages request."""
+        kwargs = self._check_params(drop_params, **kwargs)
+
+        # Convert messages
+        system_prompt, anthropic_messages = self._convert_messages(messages)
+
+        # Build request body
+        body: dict[str, Any] = {
+            "model": model,
+            "messages": anthropic_messages,
+            "max_tokens": kwargs.get("max_tokens", 4096),
+        }
+
+        if stream:
+            body["stream"] = True
+
+        # Add system prompt if present
+        if system_prompt or "system" in kwargs:
+            body["system"] = kwargs.get("system") or system_prompt
+
+        # Add optional parameters
+        if "temperature" in kwargs and kwargs["temperature"] is not None:
+            body["temperature"] = kwargs["temperature"]
+        if "top_p" in kwargs and kwargs["top_p"] is not None:
+            body["top_p"] = kwargs["top_p"]
+        if kwargs.get("stop"):
+            body["stop_sequences"] = (
+                kwargs["stop"] if isinstance(kwargs["stop"], list) else [kwargs["stop"]]
+            )
+        if kwargs.get("stop_sequences"):
+            body["stop_sequences"] = kwargs["stop_sequences"]
+        if "metadata" in kwargs:
+            body["metadata"] = kwargs["metadata"]
+
+        # Handle tools
+        if kwargs.get("tools"):
+            body["tools"] = self._convert_tools(kwargs["tools"])
+            if kwargs.get("tool_choice"):
+                tc = kwargs["tool_choice"]
+                if tc == "auto":
+                    body["tool_choice"] = {"type": "auto"}
+                elif tc == "required":
+                    body["tool_choice"] = {"type": "any"}
+                elif tc == "none":
+                    # Don't send tool_choice, effectively disabling tools
+                    pass
+                elif isinstance(tc, dict) and "function" in tc:
+                    body["tool_choice"] = {"type": "tool", "name": tc["function"]["name"]}
+
+        url = f"{self._api_base}/v1/messages"
+        body_bytes = json.dumps(body, ensure_ascii=False).encode("utf-8")
+
+        return RequestData(
+            method="POST",
+            url=url,
+            headers=self._get_headers(),
+            body=body_bytes,
+            timeout=self.config.timeout,
+        )
+
+    def parse_response(self, data: bytes, model: str) -> ModelResponse:
+        """Parse Anthropic messages response."""
+        try:
+            resp = json.loads(data.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            raise ResponseParseError(
+                f"Failed to parse response JSON: {e}",
+                provider=self.provider_name,
+                raw_data=data,
+            ) from e
+
+        return self._build_model_response(resp, model)
+
+    def _build_model_response(self, resp: dict[str, Any], model: str) -> ModelResponse:
+        """Build ModelResponse from Anthropic response."""
+        content_blocks = resp.get("content", [])
+
+        # Extract text content and tool uses
+        text_content = ""
+        tool_calls: list[ToolCall] = []
+
+        for block in content_blocks:
+            if block.get("type") == "text":
+                text_content += block.get("text", "")
+            elif block.get("type") == "tool_use":
+                tool_calls.append(
+                    ToolCall(
+                        id=block.get("id", ""),
+                        type="function",
+                        function=FunctionCall(
+                            name=block.get("name", ""),
+                            arguments=json.dumps(block.get("input", {})),
+                        ),
+                    )
+                )
+
+        message = Message(
+            role=resp.get("role", "assistant"),
+            content=text_content if text_content else None,
+            tool_calls=tool_calls if tool_calls else None,
+        )
+
+        # Map Anthropic stop reasons to OpenAI format
+        stop_reason = resp.get("stop_reason", "")
+        finish_reason = {
+            "end_turn": "stop",
+            "max_tokens": "length",
+            "stop_sequence": "stop",
+            "tool_use": "tool_calls",
+        }.get(stop_reason, stop_reason)
+
+        choice = Choice(
+            index=0,
+            message=message,
+            finish_reason=finish_reason,
+        )
+
+        # Parse usage
+        usage_data = resp.get("usage", {})
+        usage = Usage(
+            prompt_tokens=usage_data.get("input_tokens", 0),
+            completion_tokens=usage_data.get("output_tokens", 0),
+            total_tokens=usage_data.get("input_tokens", 0) + usage_data.get("output_tokens", 0),
+        )
+
+        return ModelResponse(
+            id=resp.get("id", ""),
+            object="chat.completion",
+            created=int(time.time()),
+            model=resp.get("model", model),
+            choices=[choice],
+            usage=usage,
+            model_extra={"usage": usage.model_dump()},
+        )
+
+    def parse_stream_event(self, data: str, model: str) -> StreamChunk | None:
+        """Parse Anthropic streaming event."""
+        data = data.strip()
+        if not data:
+            return None
+
+        try:
+            event = json.loads(data)
+        except json.JSONDecodeError:
+            # Anthropic sometimes sends non-JSON events
+            return None
+
+        event_type = event.get("type", "")
+
+        # Handle different event types
+        if event_type == "message_start":
+            # Initial message with metadata
+            message = event.get("message", {})
+            return StreamChunk(
+                id=message.get("id", ""),
+                object="chat.completion.chunk",
+                created=int(time.time()),
+                model=message.get("model", model),
+                choices=[
+                    ChunkChoice(
+                        index=0,
+                        delta=ChunkDelta(role="assistant"),
+                        finish_reason=None,
+                    )
+                ],
+            )
+
+        elif event_type == "content_block_start":
+            block = event.get("content_block", {})
+            if block.get("type") == "text":
+                return StreamChunk(
+                    id="",
+                    model=model,
+                    choices=[
+                        ChunkChoice(
+                            index=0,
+                            delta=ChunkDelta(content=""),
+                            finish_reason=None,
+                        )
+                    ],
+                )
+            elif block.get("type") == "tool_use":
+                # Start of tool use
+                return StreamChunk(
+                    id="",
+                    model=model,
+                    choices=[
+                        ChunkChoice(
+                            index=0,
+                            delta=ChunkDelta(
+                                tool_calls=[
+                                    {
+                                        "index": event.get("index", 0),
+                                        "id": block.get("id", ""),
+                                        "type": "function",
+                                        "function": {
+                                            "name": block.get("name", ""),
+                                            "arguments": "",
+                                        },
+                                    }
+                                ]
+                            ),
+                            finish_reason=None,
+                        )
+                    ],
+                )
+
+        elif event_type == "content_block_delta":
+            delta = event.get("delta", {})
+            if delta.get("type") == "text_delta":
+                return StreamChunk(
+                    id="",
+                    model=model,
+                    choices=[
+                        ChunkChoice(
+                            index=0,
+                            delta=ChunkDelta(content=delta.get("text", "")),
+                            finish_reason=None,
+                        )
+                    ],
+                )
+            elif delta.get("type") == "input_json_delta":
+                # Tool argument delta
+                return StreamChunk(
+                    id="",
+                    model=model,
+                    choices=[
+                        ChunkChoice(
+                            index=0,
+                            delta=ChunkDelta(
+                                tool_calls=[
+                                    {
+                                        "index": event.get("index", 0),
+                                        "function": {
+                                            "arguments": delta.get("partial_json", ""),
+                                        },
+                                    }
+                                ]
+                            ),
+                            finish_reason=None,
+                        )
+                    ],
+                )
+
+        elif event_type == "message_delta":
+            # Final delta with stop reason and usage
+            delta = event.get("delta", {})
+            usage_data = event.get("usage", {})
+
+            stop_reason = delta.get("stop_reason", "")
+            finish_reason = {
+                "end_turn": "stop",
+                "max_tokens": "length",
+                "stop_sequence": "stop",
+                "tool_use": "tool_calls",
+            }.get(stop_reason, stop_reason)
+
+            usage = None
+            if usage_data:
+                usage = Usage(
+                    prompt_tokens=0,  # Not provided in delta
+                    completion_tokens=usage_data.get("output_tokens", 0),
+                    total_tokens=usage_data.get("output_tokens", 0),
+                )
+
+            return StreamChunk(
+                id="",
+                model=model,
+                choices=[
+                    ChunkChoice(
+                        index=0,
+                        delta=ChunkDelta(),
+                        finish_reason=finish_reason,
+                    )
+                ],
+                usage=usage,
+            )
+
+        elif event_type == "message_stop":
+            # End of stream
+            return None
+
+        return None
+
+    def parse_error(
+        self,
+        status_code: int,
+        data: bytes,
+        request_id: str | None = None,
+    ) -> FastLiteLLMError:
+        """Parse Anthropic error response."""
+        try:
+            error_data = json.loads(data.decode("utf-8"))
+            error = error_data.get("error", {})
+            message = error.get("message", "Unknown error")
+            error_type = error.get("type", "")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            message = data.decode("utf-8", errors="replace")
+            error_type = ""
+
+        if status_code == 401:
+            return AuthenticationError(
+                message,
+                provider=self.provider_name,
+                status_code=status_code,
+                request_id=request_id,
+            )
+        elif status_code == 429:
+            return RateLimitError(
+                message,
+                provider=self.provider_name,
+                status_code=status_code,
+                request_id=request_id,
+            )
+        elif status_code == 400:
+            return InvalidRequestError(
+                message,
+                provider=self.provider_name,
+                status_code=status_code,
+                request_id=request_id,
+            )
+        elif status_code == 404:
+            return UnsupportedModelError(
+                message,
+                provider=self.provider_name,
+                status_code=status_code,
+                request_id=request_id,
+            )
+        else:
+            return ProviderAPIError(
+                message,
+                provider=self.provider_name,
+                status_code=status_code,
+                request_id=request_id,
+                error_type=error_type,
+            )
+
+    def build_embedding_request(
+        self,
+        *,
+        model: str,
+        input: list[str],
+        **kwargs: Any,
+    ) -> RequestData:
+        """Anthropic does not support embeddings."""
+        raise UnsupportedModelError(
+            "Anthropic does not provide an embeddings API",
+            provider=self.provider_name,
+        )
+
+    def parse_embedding_response(self, data: bytes, model: str) -> EmbeddingResponse:
+        """Anthropic does not support embeddings."""
+        raise UnsupportedModelError(
+            "Anthropic does not provide an embeddings API",
+            provider=self.provider_name,
+        )
+
+
+# Register on import
+register_provider("anthropic", AnthropicAdapter)
