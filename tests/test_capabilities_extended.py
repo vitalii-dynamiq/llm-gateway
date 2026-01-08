@@ -7,14 +7,9 @@ from __future__ import annotations
 from fastlitellm.capabilities.tables import (
     ALL_CAPABILITIES,
     ANTHROPIC_CAPABILITIES,
-    COHERE_CAPABILITIES,
-    DEEPSEEK_CAPABILITIES,
     GEMINI_CAPABILITIES,
     GROQ_CAPABILITIES,
-    MISTRAL_CAPABILITIES,
     OPENAI_CAPABILITIES,
-    PERPLEXITY_CAPABILITIES,
-    TOGETHER_CAPABILITIES,
     ModelCapabilities,
     _normalize_model_name,
 )
@@ -74,9 +69,9 @@ class TestCapabilitiesTables:
 
     def test_all_capabilities_structure(self):
         """Test ALL_CAPABILITIES has proper structure."""
-        for provider, caps in ALL_CAPABILITIES.items():
+        for _provider, caps in ALL_CAPABILITIES.items():
             assert isinstance(caps, dict)
-            for model, model_caps in caps.items():
+            for _model, model_caps in caps.items():
                 assert isinstance(model_caps, ModelCapabilities)
 
 
