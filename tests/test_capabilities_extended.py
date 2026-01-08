@@ -4,7 +4,7 @@ Extended tests for capabilities module to improve coverage.
 
 from __future__ import annotations
 
-from fastlitellm.capabilities.tables import (
+from arcllm.capabilities.tables import (
     ALL_CAPABILITIES,
     ANTHROPIC_CAPABILITIES,
     GEMINI_CAPABILITIES,

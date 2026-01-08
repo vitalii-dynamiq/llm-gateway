@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Benchmarking script for fastlitellm.
+Benchmarking script for arcllm.
 
-Compares performance overhead of fastlitellm vs baseline (mocked HTTP).
+Compares performance overhead of arcllm vs baseline (mocked HTTP).
 Does NOT make real API calls - uses mocked responses.
 """
 
@@ -46,8 +46,8 @@ def benchmark_import_time():
     import subprocess
     import sys
 
-    # Time importing fastlitellm
-    code = "import fastlitellm"
+    # Time importing arcllm
+    code = "import arcllm"
     result = subprocess.run(
         [sys.executable, "-c", f"import time; s=time.perf_counter(); {code}; print(time.perf_counter()-s)"],
         capture_output=True,
@@ -60,7 +60,7 @@ def benchmark_import_time():
 
 def benchmark_type_creation(iterations: int = 10000):
     """Benchmark creating response types."""
-    from fastlitellm.types import (
+    from arcllm.types import (
         Choice,
         Message,
         ModelResponse,
@@ -86,8 +86,8 @@ def benchmark_type_creation(iterations: int = 10000):
 
 def benchmark_response_parsing(iterations: int = 10000):
     """Benchmark parsing JSON response."""
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -104,7 +104,7 @@ def benchmark_response_parsing(iterations: int = 10000):
 
 def benchmark_sse_parsing(iterations: int = 10000):
     """Benchmark SSE parsing."""
-    from fastlitellm.http.sse import SSEParser
+    from arcllm.http.sse import SSEParser
 
     # Create chunk data
     chunk_data = b"".join(MOCK_STREAMING_CHUNKS)
@@ -121,8 +121,8 @@ def benchmark_sse_parsing(iterations: int = 10000):
 
 def benchmark_request_building(iterations: int = 10000):
     """Benchmark building requests."""
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -148,7 +148,7 @@ def benchmark_request_building(iterations: int = 10000):
 
 def benchmark_model_string_parsing(iterations: int = 100000):
     """Benchmark parsing model strings."""
-    from fastlitellm.providers.base import parse_model_string
+    from arcllm.providers.base import parse_model_string
 
     test_strings = [
         "gpt-4o-mini",
@@ -171,7 +171,7 @@ def benchmark_model_string_parsing(iterations: int = 100000):
 
 def benchmark_cost_calculation(iterations: int = 100000):
     """Benchmark cost calculation."""
-    from fastlitellm.pricing import cost_per_token
+    from arcllm.pricing import cost_per_token
 
     start = time.perf_counter()
     for _ in range(iterations):
@@ -184,8 +184,8 @@ def benchmark_cost_calculation(iterations: int = 100000):
 
 def benchmark_full_completion_mocked(iterations: int = 1000):
     """Benchmark full completion flow with mocked HTTP."""
-    import fastlitellm
-    from fastlitellm.http.client import HTTPResponse
+    import arcllm
+    from arcllm.http.client import HTTPResponse
 
     # Mock the HTTP client
     mock_response = HTTPResponse(
@@ -194,14 +194,14 @@ def benchmark_full_completion_mocked(iterations: int = 1000):
         body=json.dumps(MOCK_COMPLETION_RESPONSE).encode("utf-8"),
     )
 
-    with patch("fastlitellm.core._get_http_client") as mock_client:
+    with patch("arcllm.core._get_http_client") as mock_client:
         mock_client.return_value.request.return_value = mock_response
 
         messages = [{"role": "user", "content": "Hello!"}]
 
         start = time.perf_counter()
         for _ in range(iterations):
-            fastlitellm.completion(
+            arcllm.completion(
                 model="gpt-4o-mini",
                 messages=messages,
                 api_key="test-key",
@@ -214,9 +214,9 @@ def benchmark_full_completion_mocked(iterations: int = 1000):
 
 def benchmark_stream_chunk_builder(iterations: int = 1000):
     """Benchmark stream_chunk_builder."""
-    from fastlitellm import stream_chunk_builder
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm import stream_chunk_builder
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -244,7 +244,7 @@ def benchmark_stream_chunk_builder(iterations: int = 1000):
 def run_all_benchmarks():
     """Run all benchmarks."""
     print("=" * 60)
-    print("fastlitellm Benchmarks")
+    print("arcllm Benchmarks")
     print("=" * 60)
     print()
 

@@ -1,22 +1,22 @@
-# Adding a New Provider to fastlitellm
+# Adding a New Provider to arcllm
 
-This guide explains how to add support for a new LLM provider to fastlitellm.
+This guide explains how to add support for a new LLM provider to arcllm.
 
 ## Overview
 
 Each provider is implemented as an adapter that:
-1. Converts fastlitellm's unified input format to the provider's API format
+1. Converts arcllm's unified input format to the provider's API format
 2. Makes HTTP requests to the provider's API
-3. Converts the provider's response back to fastlitellm's unified format
+3. Converts the provider's response back to arcllm's unified format
 
 ## Step-by-Step Guide
 
 ### 1. Create the Adapter File
 
-Create a new file in `fastlitellm/providers/`:
+Create a new file in `arcllm/providers/`:
 
 ```python
-# fastlitellm/providers/newprovider_adapter.py
+# arcllm/providers/newprovider_adapter.py
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ import os
 import time
 from typing import Any
 
-from fastlitellm.types import (
+from arcllm.types import (
     ModelResponse,
     Choice,
     Message,
@@ -37,14 +37,14 @@ from fastlitellm.types import (
     ChunkDelta,
     EmbeddingResponse,
 )
-from fastlitellm.exceptions import (
-    FastLiteLLMError,
+from arcllm.exceptions import (
+    ArcLLMError,
     AuthenticationError,
     RateLimitError,
     ProviderAPIError,
     ResponseParseError,
 )
-from fastlitellm.providers.base import (
+from arcllm.providers.base import (
     BaseAdapter,
     ProviderConfig,
     RequestData,
@@ -153,7 +153,7 @@ class NewProviderAdapter(BaseAdapter):
         status_code: int,
         data: bytes,
         request_id: str | None = None,
-    ) -> FastLiteLLMError:
+    ) -> ArcLLMError:
         """Parse error response into appropriate exception."""
         try:
             error_data = json.loads(data.decode("utf-8"))
@@ -175,11 +175,11 @@ register_provider("newprovider", NewProviderAdapter)
 
 ### 2. Register the Provider
 
-Add the import to `fastlitellm/providers/base.py` in the `_register_all_providers()` function:
+Add the import to `arcllm/providers/base.py` in the `_register_all_providers()` function:
 
 ```python
 try:
-    from fastlitellm.providers import newprovider_adapter
+    from arcllm.providers import newprovider_adapter
     register_provider("newprovider", newprovider_adapter.NewProviderAdapter)
 except ImportError:
     pass
@@ -187,7 +187,7 @@ except ImportError:
 
 ### 3. Add Pricing Data
 
-Add pricing information to `fastlitellm/pricing/tables.py`:
+Add pricing information to `arcllm/pricing/tables.py`:
 
 ```python
 NEWPROVIDER_PRICING: dict[str, ModelPricing] = {
@@ -201,7 +201,7 @@ ALL_PRICING["newprovider"] = NEWPROVIDER_PRICING
 
 ### 4. Add Capability Data
 
-Add model capabilities to `fastlitellm/capabilities/tables.py`:
+Add model capabilities to `arcllm/capabilities/tables.py`:
 
 ```python
 NEWPROVIDER_CAPABILITIES: dict[str, ModelCapabilities] = {
@@ -225,8 +225,8 @@ Create test file `tests/providers/test_newprovider.py`:
 ```python
 import pytest
 import json
-from fastlitellm.providers.newprovider_adapter import NewProviderAdapter
-from fastlitellm.providers.base import ProviderConfig
+from arcllm.providers.newprovider_adapter import NewProviderAdapter
+from arcllm.providers.base import ProviderConfig
 
 
 class TestNewProviderAdapter:
@@ -261,7 +261,7 @@ class TestNewProviderAdapter:
 
 ### 6. Add to SUPPORTED_PROVIDERS
 
-Update `SUPPORTED_PROVIDERS` list in `fastlitellm/providers/base.py`:
+Update `SUPPORTED_PROVIDERS` list in `arcllm/providers/base.py`:
 
 ```python
 SUPPORTED_PROVIDERS = [
@@ -272,7 +272,7 @@ SUPPORTED_PROVIDERS = [
 
 ## Checklist
 
-- [ ] Created adapter file in `fastlitellm/providers/`
+- [ ] Created adapter file in `arcllm/providers/`
 - [ ] Implemented `build_request()` method
 - [ ] Implemented `parse_response()` method
 - [ ] Implemented `parse_stream_event()` method
@@ -294,7 +294,7 @@ SUPPORTED_PROVIDERS = [
 Many providers offer OpenAI-compatible APIs. For these, you can inherit from `OpenAIAdapter`:
 
 ```python
-from fastlitellm.providers.openai_adapter import OpenAIAdapter
+from arcllm.providers.openai_adapter import OpenAIAdapter
 
 class NewProviderAdapter(OpenAIAdapter):
     provider_name = "newprovider"
@@ -341,7 +341,7 @@ def _convert_tools(
 
 ### Error Handling
 
-Map provider-specific error codes to fastlitellm exceptions:
+Map provider-specific error codes to arcllm exceptions:
 
 ```python
 def parse_error(self, status_code: int, data: bytes, request_id: str | None = None):

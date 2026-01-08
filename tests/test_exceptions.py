@@ -1,11 +1,11 @@
 """
-Tests for fastlitellm.exceptions module.
+Tests for arcllm.exceptions module.
 """
 
-from fastlitellm.exceptions import (
+from arcllm.exceptions import (
     AuthenticationError,
     ContentFilterError,
-    FastLiteLLMError,
+    ArcLLMError,
     InvalidRequestError,
     ProviderAPIError,
     RateLimitError,
@@ -17,18 +17,18 @@ from fastlitellm.exceptions import (
 )
 
 
-class TestFastLiteLLMError:
+class TestArcLLMError:
     """Tests for base exception class."""
 
     def test_basic_error(self):
         """Test basic error creation."""
-        error = FastLiteLLMError("Something went wrong")
+        error = ArcLLMError("Something went wrong")
         assert str(error) == "Something went wrong"
         assert error.message == "Something went wrong"
 
     def test_error_with_metadata(self):
         """Test error with metadata."""
-        error = FastLiteLLMError(
+        error = ArcLLMError(
             "API error", provider="openai", model="gpt-4", status_code=500, request_id="req-123"
         )
         assert error.provider == "openai"
@@ -38,7 +38,7 @@ class TestFastLiteLLMError:
 
     def test_str_includes_metadata(self):
         """Test string representation includes metadata."""
-        error = FastLiteLLMError("API error", provider="openai", status_code=500)
+        error = ArcLLMError("API error", provider="openai", status_code=500)
         error_str = str(error)
         assert "API error" in error_str
         assert "provider=openai" in error_str
@@ -46,9 +46,9 @@ class TestFastLiteLLMError:
 
     def test_repr(self):
         """Test repr includes all fields."""
-        error = FastLiteLLMError("Test", provider="openai", model="gpt-4")
+        error = ArcLLMError("Test", provider="openai", model="gpt-4")
         repr_str = repr(error)
-        assert "FastLiteLLMError" in repr_str
+        assert "ArcLLMError" in repr_str
         assert "openai" in repr_str
 
 
@@ -58,7 +58,7 @@ class TestAuthenticationError:
     def test_authentication_error(self):
         """Test authentication error creation."""
         error = AuthenticationError("Invalid API key", provider="openai", status_code=401)
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.status_code == 401
 
 
@@ -70,7 +70,7 @@ class TestRateLimitError:
         error = RateLimitError(
             "Rate limit exceeded", retry_after=30.0, provider="openai", status_code=429
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.retry_after == 30.0
 
 
@@ -82,7 +82,7 @@ class TestTimeoutError:
         error = TimeoutError(
             "Request timed out", timeout_type="read", timeout_seconds=30.0, provider="openai"
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.timeout_type == "read"
         assert error.timeout_seconds == 30.0
 
@@ -99,7 +99,7 @@ class TestProviderAPIError:
             provider="openai",
             status_code=500,
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.error_type == "server_error"
         assert error.error_code == "500"
 
@@ -112,7 +112,7 @@ class TestUnsupportedModelError:
         error = UnsupportedModelError(
             "Model not found", model="gpt-5-turbo", provider="openai", status_code=404
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.model == "gpt-5-turbo"
 
 
@@ -124,7 +124,7 @@ class TestUnsupportedParameterError:
         error = UnsupportedParameterError(
             "Unsupported parameters", unsupported_params=["foo", "bar"], provider="anthropic"
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.unsupported_params == ["foo", "bar"]
 
 
@@ -134,7 +134,7 @@ class TestResponseParseError:
     def test_response_parse_error(self):
         """Test response parse error creation."""
         error = ResponseParseError("Invalid JSON", raw_data=b"not json", provider="openai")
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.raw_data == b"not json"
 
 
@@ -144,7 +144,7 @@ class TestContentFilterError:
     def test_content_filter_error(self):
         """Test content filter error creation."""
         error = ContentFilterError("Content blocked", filter_reason="violence", provider="openai")
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.filter_reason == "violence"
 
 
@@ -156,7 +156,7 @@ class TestInvalidRequestError:
         error = InvalidRequestError(
             "Invalid parameter value", param="temperature", provider="openai", status_code=400
         )
-        assert isinstance(error, FastLiteLLMError)
+        assert isinstance(error, ArcLLMError)
         assert error.param == "temperature"
 
 

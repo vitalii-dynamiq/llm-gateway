@@ -1,5 +1,5 @@
 """
-Tests for fastlitellm.http.async_client module.
+Tests for arcllm.http.async_client module.
 
 Tests the asynchronous HTTP client with mocked network calls.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from fastlitellm.http.async_client import AsyncHTTPClient, AsyncHTTPResponse
+from arcllm.http.async_client import AsyncHTTPClient, AsyncHTTPResponse
 
 
 class TestAsyncHTTPResponse:

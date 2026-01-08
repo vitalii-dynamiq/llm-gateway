@@ -2,7 +2,7 @@
 
 ## Overview
 
-fastlitellm supports Claude models via the Anthropic Messages API.
+arcllm supports Claude models via the Anthropic Messages API.
 
 ## API Documentation
 
@@ -12,18 +12,18 @@ fastlitellm supports Claude models via the Anthropic Messages API.
 ## Configuration
 
 ```python
-import fastlitellm
+import arcllm
 
 # Via environment variable (recommended)
 # export ANTHROPIC_API_KEY="sk-ant-..."
 
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="anthropic/claude-3-5-sonnet-latest",
     messages=[{"role": "user", "content": "Hello!"}]
 )
 
 # Or with prefix inference
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="claude-3-5-sonnet-latest",
     messages=[{"role": "user", "content": "Hello!"}]
 )
@@ -58,7 +58,7 @@ response = fastlitellm.completion(
 
 ## Message Conversion
 
-fastlitellm automatically converts OpenAI-style messages to Anthropic format:
+arcllm automatically converts OpenAI-style messages to Anthropic format:
 
 - System messages are extracted to the `system` parameter
 - Tool results are wrapped in user messages
@@ -68,7 +68,7 @@ fastlitellm automatically converts OpenAI-style messages to Anthropic format:
 
 ### Basic Completion
 ```python
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="claude-3-5-sonnet-latest",
     messages=[
         {"role": "system", "content": "You are helpful."},
@@ -91,7 +91,7 @@ tools = [{
         }
     }
 }]
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="claude-3-5-sonnet-latest",
     messages=[{"role": "user", "content": "Weather in Paris?"}],
     tools=tools
@@ -100,7 +100,7 @@ response = fastlitellm.completion(
 
 ### Streaming
 ```python
-stream = fastlitellm.completion(
+stream = arcllm.completion(
     model="claude-3-5-sonnet-latest",
     messages=[{"role": "user", "content": "Write a haiku"}],
     stream=True
@@ -112,7 +112,7 @@ for chunk in stream:
 
 ## Notes
 
-- `max_tokens` is required (fastlitellm defaults to 4096 if not specified)
+- `max_tokens` is required (arcllm defaults to 4096 if not specified)
 - Tool call IDs use Anthropic's format (`toolu_xxx`) but are compatible
 
 ## Integration Test Model

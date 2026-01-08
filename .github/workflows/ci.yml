@@ -27,16 +27,16 @@ jobs:
           pip install ruff mypy pyright
 
       - name: Run ruff check
-        run: ruff check fastlitellm tests
+        run: ruff check arcllm tests
 
       - name: Run ruff format check
-        run: ruff format --check fastlitellm tests
+        run: ruff format --check arcllm tests
 
       - name: Run mypy (strict)
-        run: mypy fastlitellm --strict
+        run: mypy arcllm --strict
 
       - name: Run pyright (strict)
-        run: pyright fastlitellm
+        run: pyright arcllm
 
   unit-tests:
     name: Unit Tests (Python ${{ matrix.python-version }})
@@ -64,7 +64,7 @@ jobs:
             --ignore=tests/integration \
             -v \
             --tb=short \
-            --cov=fastlitellm \
+            --cov=arcllm \
             --cov-report=xml \
             --cov-report=html \
             --cov-report=term-missing \
@@ -111,7 +111,7 @@ jobs:
 
       - name: Run basic import test
         run: |
-          python -c "import fastlitellm; print(f'fastlitellm {fastlitellm.__version__} loaded successfully')"
+          python -c "import arcllm; print(f'arcllm {arcllm.__version__} loaded successfully')"
 
       - name: Run unit tests (Python 3.14)
         run: |

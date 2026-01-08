@@ -8,13 +8,13 @@ from unittest.mock import patch
 
 import pytest
 
-from fastlitellm.exceptions import (
+from arcllm.exceptions import (
     AuthenticationError,
     RateLimitError,
     ResponseParseError,
 )
-from fastlitellm.providers.base import ProviderConfig
-from fastlitellm.providers.gemini_adapter import GeminiAdapter
+from arcllm.providers.base import ProviderConfig
+from arcllm.providers.gemini_adapter import GeminiAdapter
 
 
 class TestGeminiAdapter:

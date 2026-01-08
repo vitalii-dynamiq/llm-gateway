@@ -1,5 +1,5 @@
 """
-Integration tests for fastlitellm providers.
+Integration tests for arcllm providers.
 
 These tests make actual API calls to provider endpoints and require
 real credentials configured via environment variables.

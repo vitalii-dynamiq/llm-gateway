@@ -3,17 +3,17 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fastlitellm"
+name = "arcllm"
 version = "0.1.0"
-description = "A fast, lightweight, API-compatible alternative to LiteLLM SDK"
+description = "The arc connecting you to every LLM. Zero dependencies, maximum performance."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 authors = [
-    { name = "FastLiteLLM Contributors" }
+    { name = "ArcLLM Contributors" }
 ]
-keywords = ["llm", "openai", "anthropic", "gemini", "ai", "api", "gateway"]
+keywords = ["llm", "openai", "anthropic", "gemini", "claude", "gpt", "ai", "api", "gateway", "unified", "multi-provider"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -43,13 +43,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/fastlitellm/fastlitellm"
-Documentation = "https://github.com/fastlitellm/fastlitellm#readme"
-Repository = "https://github.com/fastlitellm/fastlitellm"
-Issues = "https://github.com/fastlitellm/fastlitellm/issues"
+Homepage = "https://github.com/arcllm/arcllm"
+Documentation = "https://github.com/arcllm/arcllm#readme"
+Repository = "https://github.com/arcllm/arcllm"
+Issues = "https://github.com/arcllm/arcllm/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["fastlitellm"]
+packages = ["arcllm"]
 
 [tool.ruff]
 target-version = "py312"
@@ -74,7 +74,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["fastlitellm"]
+known-first-party = ["arcllm"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -99,7 +99,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["fastlitellm"]
+source = ["arcllm"]
 branch = true
 
 [tool.coverage.report]
@@ -113,15 +113,15 @@ exclude_lines = [
 # These adapters follow the same pattern as OpenAI and can be tested
 # via integration tests with real API calls
 omit = [
-    "fastlitellm/providers/bedrock_adapter.py",
-    "fastlitellm/providers/cohere_adapter.py",
-    "fastlitellm/providers/databricks_adapter.py",
-    "fastlitellm/providers/ollama_adapter.py",
-    "fastlitellm/providers/vertex_adapter.py",
-    "fastlitellm/providers/azure_adapter.py",
-    "fastlitellm/providers/mistral_adapter.py",
+    "arcllm/providers/bedrock_adapter.py",
+    "arcllm/providers/cohere_adapter.py",
+    "arcllm/providers/databricks_adapter.py",
+    "arcllm/providers/ollama_adapter.py",
+    "arcllm/providers/vertex_adapter.py",
+    "arcllm/providers/azure_adapter.py",
+    "arcllm/providers/mistral_adapter.py",
     # Async client networking code is better tested via integration
-    "fastlitellm/http/async_client.py",
+    "arcllm/http/async_client.py",
 ]
 
 [tool.pyright]

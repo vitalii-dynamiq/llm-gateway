@@ -8,13 +8,13 @@ from unittest.mock import patch
 
 import pytest
 
-from fastlitellm.exceptions import (
+from arcllm.exceptions import (
     AuthenticationError,
     RateLimitError,
     ResponseParseError,
 )
-from fastlitellm.providers.base import ProviderConfig
-from fastlitellm.providers.openai_adapter import OpenAIAdapter
+from arcllm.providers.base import ProviderConfig
+from arcllm.providers.openai_adapter import OpenAIAdapter
 
 
 class TestOpenAIAdapter:

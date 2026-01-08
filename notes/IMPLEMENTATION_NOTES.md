@@ -1,8 +1,8 @@
-# fastlitellm Implementation Notes
+# arcllm Implementation Notes
 
 ## Overview
 
-This document provides implementation notes for the fastlitellm library - a fast, lightweight, API-compatible alternative to LiteLLM SDK.
+This document provides implementation notes for the arcllm library - a fast, lightweight, API-compatible alternative to LiteLLM SDK.
 
 ## Architecture Decisions
 
@@ -29,7 +29,7 @@ Each provider implements the `Adapter` protocol:
 - `build_request()` - Converts unified input to provider format
 - `parse_response()` - Converts provider response to unified output
 - `parse_stream_event()` - Handles streaming events
-- `parse_error()` - Maps provider errors to fastlitellm exceptions
+- `parse_error()` - Maps provider errors to arcllm exceptions
 
 Many providers (Groq, Together AI, Fireworks, DeepSeek, Perplexity, Databricks) use OpenAI-compatible APIs, so they inherit from `OpenAIAdapter`.
 

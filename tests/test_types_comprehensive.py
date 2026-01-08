@@ -1,12 +1,12 @@
 """
-Comprehensive tests for fastlitellm.types module.
+Comprehensive tests for arcllm.types module.
 
 Tests all type classes, model_dump methods, and edge cases.
 """
 
 from __future__ import annotations
 
-from fastlitellm.types import (
+from arcllm.types import (
     Choice,
     ChunkChoice,
     ChunkDelta,

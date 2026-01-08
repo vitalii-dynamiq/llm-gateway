@@ -2,7 +2,7 @@
 
 ## Overview
 
-fastlitellm supports all OpenAI chat completion and embedding models.
+arcllm supports all OpenAI chat completion and embedding models.
 
 ## API Documentation
 
@@ -12,18 +12,18 @@ fastlitellm supports all OpenAI chat completion and embedding models.
 ## Configuration
 
 ```python
-import fastlitellm
+import arcllm
 
 # Via environment variable (recommended)
 # export OPENAI_API_KEY="sk-..."
 
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}]
 )
 
 # Or explicit API key
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="openai/gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}],
     api_key="sk-..."
@@ -61,7 +61,7 @@ response = fastlitellm.completion(
 
 ### Streaming
 ```python
-stream = fastlitellm.completion(
+stream = arcllm.completion(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Count to 5"}],
     stream=True,
@@ -83,7 +83,7 @@ tools = [{
         }}
     }
 }]
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Weather in NYC?"}],
     tools=tools
@@ -92,7 +92,7 @@ response = fastlitellm.completion(
 
 ### JSON Schema Output
 ```python
-response = fastlitellm.completion(
+response = arcllm.completion(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Generate user profile"}],
     response_format={

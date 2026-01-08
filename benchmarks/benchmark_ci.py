@@ -84,7 +84,7 @@ MOCK_STREAMING_CHUNKS = [
 
 def measure_import_time() -> float:
     """Measure import time in milliseconds."""
-    code = "import fastlitellm"
+    code = "import arcllm"
     result = subprocess.run(
         [
             sys.executable,
@@ -99,7 +99,7 @@ def measure_import_time() -> float:
 
 def measure_type_creation(iterations: int = 5000) -> float:
     """Measure type creation time in microseconds per operation."""
-    from fastlitellm.types import Choice, Message, ModelResponse, Usage
+    from arcllm.types import Choice, Message, ModelResponse, Usage
 
     start = time.perf_counter()
     for _ in range(iterations):
@@ -118,8 +118,8 @@ def measure_type_creation(iterations: int = 5000) -> float:
 
 def measure_response_parsing(iterations: int = 5000) -> float:
     """Measure response parsing time in microseconds per operation."""
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -134,8 +134,8 @@ def measure_response_parsing(iterations: int = 5000) -> float:
 
 def measure_request_building(iterations: int = 5000) -> float:
     """Measure request building time in microseconds per operation."""
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)
@@ -158,7 +158,7 @@ def measure_request_building(iterations: int = 5000) -> float:
 
 def measure_sse_parsing(iterations: int = 5000) -> float:
     """Measure SSE parsing time in microseconds per stream."""
-    from fastlitellm.http.sse import SSEParser
+    from arcllm.http.sse import SSEParser
 
     chunk_data = b"".join(MOCK_STREAMING_CHUNKS)
 
@@ -172,7 +172,7 @@ def measure_sse_parsing(iterations: int = 5000) -> float:
 
 def measure_model_parsing(iterations: int = 50000) -> float:
     """Measure model string parsing time in microseconds per operation."""
-    from fastlitellm.providers.base import parse_model_string
+    from arcllm.providers.base import parse_model_string
 
     test_strings = [
         "gpt-4o-mini",
@@ -193,8 +193,8 @@ def measure_full_completion_mocked(iterations: int = 500) -> float:
     """Measure full completion flow with mocked HTTP in milliseconds."""
     from unittest.mock import patch
 
-    import fastlitellm
-    from fastlitellm.http.client import HTTPResponse
+    import arcllm
+    from arcllm.http.client import HTTPResponse
 
     mock_response = HTTPResponse(
         status_code=200,
@@ -202,14 +202,14 @@ def measure_full_completion_mocked(iterations: int = 500) -> float:
         body=json.dumps(MOCK_COMPLETION_RESPONSE).encode("utf-8"),
     )
 
-    with patch("fastlitellm.core._get_http_client") as mock_client:
+    with patch("arcllm.core._get_http_client") as mock_client:
         mock_client.return_value.request.return_value = mock_response
 
         messages = [{"role": "user", "content": "Hello!"}]
 
         start = time.perf_counter()
         for _ in range(iterations):
-            fastlitellm.completion(
+            arcllm.completion(
                 model="gpt-4o-mini",
                 messages=messages,
                 api_key="test-key",
@@ -221,9 +221,9 @@ def measure_full_completion_mocked(iterations: int = 500) -> float:
 
 def measure_stream_chunk_builder(iterations: int = 1000) -> float:
     """Measure stream chunk builder time in milliseconds."""
-    from fastlitellm import stream_chunk_builder
-    from fastlitellm.providers.base import ProviderConfig
-    from fastlitellm.providers.openai_adapter import OpenAIAdapter
+    from arcllm import stream_chunk_builder
+    from arcllm.providers.base import ProviderConfig
+    from arcllm.providers.openai_adapter import OpenAIAdapter
 
     config = ProviderConfig(api_key="test-key")
     adapter = OpenAIAdapter(config)

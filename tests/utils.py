@@ -1,5 +1,5 @@
 """
-Test utilities for fastlitellm tests.
+Test utilities for arcllm tests.
 
 Provides mock HTTP clients, assertion helpers, and test decorators.
 """
@@ -120,7 +120,7 @@ def make_streaming_response(
 
 def assert_model_response_valid(response: Any) -> None:
     """Assert that a ModelResponse has the expected structure."""
-    from fastlitellm.types import ModelResponse
+    from arcllm.types import ModelResponse
 
     assert isinstance(response, ModelResponse)
     assert response.id is not None
@@ -135,7 +135,7 @@ def assert_model_response_valid(response: Any) -> None:
 
 def assert_tool_calls_valid(response: Any) -> None:
     """Assert that tool calls in response are properly formatted."""
-    from fastlitellm.types import ModelResponse, ToolCall
+    from arcllm.types import ModelResponse, ToolCall
 
     assert isinstance(response, ModelResponse)
     choice = response.choices[0]
@@ -156,7 +156,7 @@ def assert_tool_calls_valid(response: Any) -> None:
 
 def assert_usage_valid(response: Any) -> None:
     """Assert that usage information is present and valid."""
-    from fastlitellm.types import ModelResponse
+    from arcllm.types import ModelResponse
 
     assert isinstance(response, ModelResponse)
     assert response.usage is not None
@@ -173,7 +173,7 @@ def assert_usage_valid(response: Any) -> None:
 
 def assert_embedding_response_valid(response: Any) -> None:
     """Assert that an EmbeddingResponse has the expected structure."""
-    from fastlitellm.types import EmbeddingResponse
+    from arcllm.types import EmbeddingResponse
 
     assert isinstance(response, EmbeddingResponse)
     assert response.model is not None
@@ -186,7 +186,7 @@ def assert_embedding_response_valid(response: Any) -> None:
 
 def assert_stream_chunks_valid(chunks: list[Any]) -> None:
     """Assert that streaming chunks are valid."""
-    from fastlitellm.types import StreamChunk
+    from arcllm.types import StreamChunk
 
     assert len(chunks) > 0
     for chunk in chunks:
