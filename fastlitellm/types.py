@@ -48,7 +48,8 @@ class FunctionCall:
     def parse_arguments(self) -> dict[str, Any]:
         """Parse the arguments JSON string into a dict. Raises ValueError on invalid JSON."""
         try:
-            return json.loads(self.arguments)
+            result: dict[str, Any] = json.loads(self.arguments)
+            return result
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in function arguments: {e}") from e
 

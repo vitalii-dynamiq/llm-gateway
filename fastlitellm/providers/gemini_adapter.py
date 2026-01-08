@@ -99,14 +99,14 @@ class GeminiAdapter(BaseAdapter):
                 parts = self._convert_content_to_parts(content)
                 gemini_contents.append({"role": "user", "parts": parts})
             elif role == "assistant":
-                parts: list[dict[str, Any]] = []
+                assistant_parts: list[dict[str, Any]] = []
                 if content:
-                    parts.append({"text": content})
+                    assistant_parts.append({"text": content})
                 # Handle tool calls
                 if msg.get("tool_calls"):
                     for tc in msg["tool_calls"]:
                         func = tc.get("function", {})
-                        parts.append(
+                        assistant_parts.append(
                             {
                                 "functionCall": {
                                     "name": func.get("name", ""),
@@ -114,7 +114,7 @@ class GeminiAdapter(BaseAdapter):
                                 }
                             }
                         )
-                gemini_contents.append({"role": "model", "parts": parts})
+                gemini_contents.append({"role": "model", "parts": assistant_parts})
             elif role == "tool":
                 # Tool result
                 gemini_contents.append(
